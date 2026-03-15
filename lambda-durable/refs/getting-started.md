@@ -1,4 +1,4 @@
-# Getting Started with AWS Lambda Durable Functions
+# Getting Started with AWS Lambda durable functions
 
 Quick start guide for building your first durable function.
 
@@ -11,6 +11,7 @@ Ask to create a git repo for projects if one doesn't exist already.
 ## Basic Handler
 
 **TypeScript:**
+
 ```typescript
 import { withDurableExecution, DurableContext } from '@aws/durable-execution-sdk-js';
 
@@ -33,6 +34,7 @@ export const handler = withDurableExecution(async (event, context: DurableContex
 ```
 
 **Python:**
+
 ```python
 from aws_durable_execution_sdk_python import durable_execution, DurableContext, durable_step, StepContext
 from aws_durable_execution_sdk_python.config import Duration
@@ -58,6 +60,7 @@ def handler(event: dict, context: DurableContext) -> dict:
 ### Multi-Step Workflow
 
 **TypeScript:**
+
 ```typescript
 export const handler = withDurableExecution(async (event, context: DurableContext) => {
   const validated = await context.step('validate', async () => 
@@ -81,6 +84,7 @@ export const handler = withDurableExecution(async (event, context: DurableContex
 ### GenAI Agent (Agentic Loop)
 
 **TypeScript:**
+
 ```typescript
 export const handler = withDurableExecution(async (event, context: DurableContext) => {
   const messages = [{ role: 'user', content: event.prompt }];
@@ -102,6 +106,7 @@ export const handler = withDurableExecution(async (event, context: DurableContex
 ```
 
 **Python:**
+
 ```python
 # Note: invoke_ai_model and execute_tool are decorated with @durable_step
 @durable_execution
@@ -122,6 +127,7 @@ def handler(event: dict, context: DurableContext) -> str:
 ### Human-in-the-Loop Approval
 
 **TypeScript:**
+
 ```typescript
 export const handler = withDurableExecution(async (event, context: DurableContext) => {
   const plan = await context.step('generate-plan', async () =>
@@ -144,14 +150,17 @@ export const handler = withDurableExecution(async (event, context: DurableContex
 ```
 
 **Python:**
+
 ```python
-from aws_durable_execution_sdk_python.waits import WaitForCallbackConfig
+from aws_durable_execution_sdk_python.config import WaitForCallbackConfig
 
 @durable_execution
 def handler(event: dict, context: DurableContext) -> dict:
+    # Note: generate_plan and perform_action are decorated with @durable_step
     plan = context.step(generate_plan(event))
 
-    def submit_approval(callback_id: str):
+    # Wait for external approval
+    def submit_approval(callback_id: str, ctx):
         send_approval_email(event['approver_email'], plan, callback_id)
 
     answer = context.wait_for_callback(
@@ -170,6 +179,7 @@ def handler(event: dict, context: DurableContext) -> dict:
 ### Saga Pattern (Compensating Transactions)
 
 **TypeScript:**
+
 ```typescript
 export const handler = withDurableExecution(async (event, context: DurableContext) => {
   const compensations: Array<{ name: string; fn: () => Promise<void> }> = [];
@@ -199,6 +209,8 @@ export const handler = withDurableExecution(async (event, context: DurableContex
 
 ## Project Structure
 
+### TypeScript
+
 ```
 my-durable-function/
 ├── src/
@@ -216,6 +228,26 @@ my-durable-function/
 ├── jest.config.js              # Jest configuration
 ├── tsconfig.json               # TypeScript configuration
 └── package.json
+```
+
+### Python
+
+```
+my-durable-function/
+├── src/
+│   ├── handler.py              # Main handler
+│   ├── steps/                  # Step functions
+│   │   ├── __init__.py
+│   │   ├── validate.py
+│   │   └── process.py
+│   └── utils/
+│       └── retry_strategies.py
+├── tests/
+│   └── test_handler.py         # Tests with DurableFunctionTestRunner
+│   └── test_handler.py         # Tests with DurableFunctionTestRunner
+├── infrastructure/
+│   └── template.yaml           # SAM/CloudFormation
+└── pyproject.toml              # Project configuration
 ```
 
 ## ESLint Plugin Setup
@@ -250,12 +282,32 @@ import durableExecutionPlugin from '@aws/durable-execution-sdk-js-eslint-plugin'
 
 export default [
   durableExecutionPlugin.configs.recommended,
+  // Your other configs...
 ];
 ```
+
+### Option C: Legacy .eslintrc.json
+
+```json
+{
+  "plugins": ["@aws/durable-execution-sdk-js-eslint-plugin"],
+  "extends": ["plugin:@aws/durable-execution-sdk-js-eslint-plugin/recommended"],
+  "rules": {
+    "@aws/durable-execution-sdk-js-eslint-plugin/no-nested-durable-operations": "error"
+  }
+}
+```
+
+**What the plugin catches:**
+
+- Nested durable operations inside step functions
+- Incorrect usage of durable context outside handler
+- Common replay model violations
 
 ## Jest Configuration
 
 **jest.config.js:**
+
 ```javascript
 module.exports = {
   preset: 'ts-jest',
@@ -272,9 +324,46 @@ module.exports = {
 };
 ```
 
+**Key Configuration:**
+
+- `preset: 'ts-jest'` - Essential for TypeScript support
+- `transform` - Maps .ts files to ts-jest transformer
+- `testMatch` - Specifies test file patterns
+
+## Python Project Setup
+Add `aws-durable-execution-sdk-python-testing` to your dev/test dependencies in pyproject.toml.
+
+## Development Workflow
+
+### TypeScript
+
+1. **Write handler** with durable operations
+2. **Test locally** with `LocalDurableTestRunner`
+3. **Validate replay rules** (no non-deterministic code outside steps)
+4. **Deploy** with qualified ARN (version or alias)
+5. **Monitor** execution state and logs
+
+### Python
+
+1. **Write handler** with `@durable_execution` decorator
+2. **Test locally** with `DurableFunctionTestRunner` and pytest
+3. **Validate replay rules** (no non-deterministic code outside steps)
+4. **Deploy** with qualified ARN (version or alias)
+5. **Monitor** execution state and logs
+
+## Key Concepts
+
+- **Steps**: Atomic operations with automatic retry and checkpointing
+- **Waits**: Suspend execution without compute charges (up to 1 year)
+- **Child Contexts**: Group multiple durable operations
+- **Callbacks**: Wait for external systems to respond
+- **Map/Parallel**: Process arrays or run operations concurrently
+
 ## Setup Checklist
 
 When starting a new durable function project:
+
+### TypeScript
 
 - [ ] Install dependencies (`@aws/durable-execution-sdk-js`, testing & eslint packages)
 - [ ] Create `jest.config.js` with ts-jest preset
@@ -286,3 +375,28 @@ When starting a new durable function project:
 - [ ] Verify TypeScript compilation: `npx tsc --noEmit`
 - [ ] Run tests to confirm setup: `npm test`
 - [ ] Review replay model rules (no non-deterministic code outside steps)
+
+### Python
+
+- [ ] Install `aws-durable-execution-sdk-python`
+- [ ] Install `aws-durable-execution-sdk-python-testing` and `pytest` for testing
+- [ ] Create handler with `@durable_execution` decorator
+- [ ] Define step functions with `@durable_step` decorator
+- [ ] Write tests using `DurableFunctionTestRunner` class
+- [ ] Run tests: `pytest`
+- [ ] Review replay model rules (no non-deterministic code outside steps)
+
+## Error Scenarios
+
+### Unsupported Language
+
+- List detected language
+- State: "Durable Execution SDK is not yet available for [language]"
+- List supported languages as alternatives
+
+## Next Steps
+
+- Review **replay-model-rules.md** to avoid common pitfalls
+- Explore **step-operations.md** for retry strategies
+- Learn **wait-operations.md** for external integrations
+- Check **testing-patterns.md** for comprehensive testing

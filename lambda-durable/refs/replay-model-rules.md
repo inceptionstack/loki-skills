@@ -12,6 +12,7 @@ Durable functions use a "checkpoint and replay" execution model:
 4. New steps execute when reached
 
 **Example:**
+
 ```typescript
 // First execution: Runs lines 1-5
 // After wait: Runs lines 1-5 again (line 2 returns cached result)
@@ -27,7 +28,9 @@ const result = await context.step('process', async () => process(data)); // Line
 ### ❌ WRONG - Non-Deterministic Outside Steps
 
 **TypeScript:**
+
 ```typescript
+// These values change on each replay!
 const id = uuid.v4();                    // Different UUID each time
 const timestamp = Date.now();            // Different timestamp each time
 const random = Math.random();            // Different random number
@@ -37,7 +40,9 @@ await context.step('save', async () => saveData({ id, timestamp }));
 ```
 
 **Python:**
+
 ```python
+# These values change on each replay!
 id = str(uuid.uuid4())                   # Different UUID each time
 timestamp = time.time()                  # Different timestamp each time
 random_val = random.random()             # Different random number
@@ -49,18 +54,23 @@ context.step(lambda _: save_data({"id": id}), name='save')
 ### ✅ CORRECT - Non-Deterministic Inside Steps
 
 **TypeScript:**
+
 ```typescript
 const id = await context.step('generate-id', async () => uuid.v4());
 const timestamp = await context.step('get-time', async () => Date.now());
 const random = await context.step('random', async () => Math.random());
+const now = await context.step('get-date', async () => new Date());
 
 await context.step('save', async () => saveData({ id, timestamp }));
 ```
 
 **Python:**
+
 ```python
 id = context.step(lambda _: str(uuid.uuid4()), name='generate-id')
 timestamp = context.step(lambda _: time.time(), name='get-time')
+random_val = context.step(lambda _: random.random(), name='random')
+now = context.step(lambda _: datetime.now(), name='get-date')
 
 context.step(lambda _: save_data({"id": id}), name='save')
 ```
@@ -83,6 +93,7 @@ context.step(lambda _: save_data({"id": id}), name='save')
 ### ❌ WRONG - Nested Operations
 
 **TypeScript:**
+
 ```typescript
 await context.step('process', async () => {
   await context.wait({ seconds: 1 });      // ERROR!
@@ -92,9 +103,22 @@ await context.step('process', async () => {
 });
 ```
 
+**Python:**
+
+```python
+@durable_step
+def process(step_ctx: StepContext):
+    context.wait(duration=Duration.from_seconds(1))  # ERROR!
+    context.step(lambda _: ..., name='nested')       # ERROR!
+    return result
+
+context.step(process())
+```
+
 ### ✅ CORRECT - Use Child Context
 
 **TypeScript:**
+
 ```typescript
 await context.runInChildContext('process', async (childCtx) => {
   await childCtx.wait({ seconds: 1 });
@@ -105,7 +129,9 @@ await context.runInChildContext('process', async (childCtx) => {
 ```
 
 **Python:**
+
 ```python
+# Note: validate and process are decorated with @durable_step
 def process_child(child_ctx: DurableContext):
     child_ctx.wait(duration=Duration.from_seconds(1))
     step1 = child_ctx.step(validate())
@@ -121,6 +147,8 @@ context.run_in_child_context(func=process_child, name='process')
 
 ### ❌ WRONG - Lost Mutations
 
+**TypeScript:**
+
 ```typescript
 let counter = 0;
 await context.step('increment', async () => {
@@ -129,7 +157,22 @@ await context.step('increment', async () => {
 console.log(counter);  // Always 0 on replay!
 ```
 
+**Python:**
+
+```python
+counter = 0
+@durable_step
+def increment(step_ctx: StepContext):
+    nonlocal counter
+    counter += 1  # This mutation is lost!
+
+context.step(increment())
+print(counter)  # Always 0 on replay!
+```
+
 ### ✅ CORRECT - Return Values
+
+**TypeScript:**
 
 ```typescript
 let counter = 0;
@@ -137,11 +180,21 @@ counter = await context.step('increment', async () => counter + 1);
 console.log(counter);  // Correct value
 ```
 
+**Python:**
+
+```python
+counter = 0
+counter = context.step(lambda _: counter + 1, name='increment')
+print(counter)  # Correct value
+```
+
 ## Rule 4: Side Effects Outside Steps Repeat
 
 **Side effects outside steps happen on EVERY replay.**
 
 ### ❌ WRONG - Repeated Side Effects
+
+**TypeScript:**
 
 ```typescript
 console.log('Starting process');     // Logs multiple times!
@@ -151,13 +204,35 @@ await updateDatabase(data);          // Updates multiple times!
 await context.step('process', async () => process());
 ```
 
+**Python:**
+
+```python
+print('Starting process')            # Prints multiple times!
+send_email(user.email)               # Sends multiple emails!
+update_database(data)                # Updates multiple times!
+
+context.step(lambda _: process(), name='process')
+```
+
 ### ✅ CORRECT - Side Effects In Steps
+
+**TypeScript:**
 
 ```typescript
 context.logger.info('Starting process');  // Deduplicated automatically
 await context.step('send-email', async () => sendEmail(user.email));
 await context.step('update-db', async () => updateDatabase(data));
 await context.step('process', async () => process());
+```
+
+**Python:**
+
+```python
+# Note: Functions are decorated with @durable_step
+context.logger.info('Starting process')  # Deduplicated automatically
+context.step(send_email(user.email))
+context.step(update_database(data))
+context.step(process())
 ```
 
 ### Exception: context.logger
@@ -171,9 +246,11 @@ await context.step('process', async () => process());
 ```typescript
 // ❌ WRONG if env vars can change
 const apiKey = process.env.API_KEY;
+await context.step('call-api', async () => callAPI(apiKey));
 
 // ✅ CORRECT
 const apiKey = await context.step('get-key', async () => process.env.API_KEY);
+await context.step('call-api', async () => callAPI(apiKey));
 ```
 
 ### Pitfall 2: Array/Object Mutations
@@ -218,3 +295,16 @@ If you see inconsistent behavior:
 3. **Look for closure mutations**
 4. **Search for side effects outside steps**
 5. **Use `context.logger` to trace execution flow**
+
+## Testing Replay Behavior
+
+Always test with multiple invocations to simulate replay:
+
+```typescript
+const runner = new LocalDurableTestRunner({ handlerFunction: handler });
+const execution = await runner.run({ payload: { test: true } });
+
+// Verify operations executed correctly
+const step1 = runner.getOperation('step-name');
+expect(step1.getStatus()).toBe(OperationStatus.SUCCEEDED);
+```

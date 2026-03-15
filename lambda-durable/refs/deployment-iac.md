@@ -12,6 +12,8 @@ All durable functions require:
 
 ## AWS CloudFormation
 
+**template.yaml:**
+
 ```yaml
 AWSTemplateFormatVersion: '2010-09-09'
 Resources:
@@ -65,6 +67,7 @@ Outputs:
 ```
 
 **Deploy:**
+
 ```bash
 aws cloudformation deploy \
   --template-file template.yaml \
@@ -73,6 +76,8 @@ aws cloudformation deploy \
 ```
 
 ## AWS CDK
+
+**TypeScript:**
 
 ```typescript
 import * as cdk from 'aws-cdk-lib';
@@ -84,7 +89,7 @@ export class DurableFunctionStack extends cdk.Stack {
     super(scope, id, props);
 
     const durableFunction = new lambda.Function(this, 'DurableFunction', {
-      runtime: lambda.Runtime.NODEJS_24_X,
+      runtime: lambda.Runtime.NODEJS_24_X,  // or PYTHON_3_14
       handler: 'index.handler',
       code: lambda.Code.fromAsset('lambda'),
       durableConfig: {
@@ -98,12 +103,14 @@ export class DurableFunctionStack extends cdk.Stack {
 
     // CDK automatically adds checkpoint permissions when durableConfig is set
 
+    // Create version and alias
     const version = durableFunction.currentVersion;
     const alias = new lambda.Alias(this, 'ProdAlias', {
       aliasName: 'prod',
       version: version
     });
 
+    // Output the qualified ARN
     new cdk.CfnOutput(this, 'FunctionAliasArn', {
       value: alias.functionArn
     });
@@ -111,29 +118,40 @@ export class DurableFunctionStack extends cdk.Stack {
 }
 ```
 
+**Deploy:**
+
+```bash
+cdk deploy
+```
+
 ### CDK Custom Log Group Management
+
+**Best Practice:** Explicitly create and manage CloudWatch Log Groups for better control over retention, cleanup, and costs.
 
 ```typescript
 import * as logs from 'aws-cdk-lib/aws-logs';
+import * as iam from 'aws-cdk-lib/aws-iam';
 
+// 1. Create explicit log group
 const functionLogGroup = new logs.LogGroup(this, 'DurableFunctionLogGroup', {
   logGroupName: '/aws/lambda/myDurableFunction',
   retention: logs.RetentionDays.ONE_WEEK,
-  removalPolicy: cdk.RemovalPolicy.DESTROY,
+  removalPolicy: cdk.RemovalPolicy.DESTROY,  // Delete on stack destroy
 });
 
+// 2. Link to function
 const durableFunction = new lambda.Function(this, 'DurableFunction', {
   runtime: lambda.Runtime.NODEJS_24_X,
   handler: 'index.handler',
   code: lambda.Code.fromAsset('lambda'),
-  logGroup: functionLogGroup,
+  logGroup: functionLogGroup,  // Link to managed log group
   durableConfig: {
     executionTimeout: cdk.Duration.hours(1),
     retentionPeriod: cdk.Duration.days(7)
   }
 });
 
-// Required with explicit log groups
+// 3. Add durable execution policy (required with explicit log groups)
 durableFunction.role?.addManagedPolicy(
   iam.ManagedPolicy.fromAwsManagedPolicyName(
     'service-role/AWSLambdaBasicDurableExecutionRolePolicy'
@@ -141,7 +159,24 @@ durableFunction.role?.addManagedPolicy(
 );
 ```
 
+**Benefits:**
+
+- **Explicit Cleanup**: `removalPolicy: cdk.RemovalPolicy.DESTROY` ensures log groups are deleted when stack is destroyed
+- **Custom Retention**: Set retention periods matching compliance/debugging needs
+- **Predictable Naming**: Control exact log group name
+- **Cost Control**: Avoid accumulating costs from orphaned log groups
+
+**When to use:**
+
+- ✅ Production environments where log retention policies must be enforced
+- ✅ Development/test environments where automatic cleanup saves costs
+- ✅ Multi-function stacks where consistent log management is needed
+
+**Important:** Don't forget to add `AWSLambdaBasicDurableExecutionRolePolicy` when using explicit log groups.
+
 ## AWS SAM
+
+**template.yaml:**
 
 ```yaml
 AWSTemplateFormatVersion: '2010-09-09'
@@ -157,7 +192,7 @@ Resources:
     Type: AWS::Serverless::Function
     Properties:
       FunctionName: myDurableFunction
-      Runtime: nodejs24.x
+      Runtime: nodejs24.x  # or python3.14
       Handler: index.handler
       CodeUri: ./src
       DurableConfig:
@@ -169,40 +204,73 @@ Resources:
       Environment:
         Variables:
           LOG_LEVEL: INFO
+
+Outputs:
+  FunctionArn:
+    Value: !GetAtt DurableFunction.Arn
+  AliasArn:
+    Value: !Ref DurableFunction.Alias
 ```
 
 **Deploy:**
+
 ```bash
 sam build
 sam deploy --guided
 ```
 
-## Durable Invokes (Cross-Function)
+## Durable Invokes
 
-For functions that invoke other durable functions, add invoke permissions:
+For functions that invoke other durable functions:
 
 **CloudFormation:**
+
 ```yaml
-Policies:
-  - PolicyName: InvokeOtherFunctions
-    PolicyDocument:
+DurableFunctionRole:
+  Type: AWS::IAM::Role
+  Properties:
+    AssumeRolePolicyDocument:
       Version: '2012-10-17'
       Statement:
         - Effect: Allow
-          Action: lambda:InvokeFunction
-          Resource:
-            - !GetAtt TargetFunction.Arn
-            - !Sub '${TargetFunction.Arn}:*'
+          Principal:
+            Service: lambda.amazonaws.com
+          Action: sts:AssumeRole
+    ManagedPolicyArns:
+      - arn:aws:iam::aws:policy/service-role/AWSLambdaBasicDurableExecutionRolePolicy
+    Policies:
+      - PolicyName: InvokeOtherFunctions
+        PolicyDocument:
+          Version: '2012-10-17'
+          Statement:
+            - Effect: Allow
+              Action:
+                - lambda:InvokeFunction
+              Resource:
+                - !GetAtt TargetFunction.Arn
+                - !Sub '${TargetFunction.Arn}:*'  # For versions/aliases
 ```
 
 **CDK:**
+
 ```typescript
+const targetFunction = new lambda.Function(this, 'TargetFunction', {
+  // ... configuration
+});
+
+const orchestratorFunction = new lambda.Function(this, 'OrchestratorFunction', {
+  // ... configuration with durableConfig
+});
+
+// Grant invoke permission
 targetFunction.grantInvoke(orchestratorFunction);
 ```
 
-## External Callbacks IAM
+## External Callbacks
 
 For external systems to send callbacks:
+
+**IAM Policy:**
 
 ```json
 {
@@ -221,55 +289,254 @@ For external systems to send callbacks:
 }
 ```
 
+## Environment Configuration
+
+**Development:**
+
+```yaml
+DurableFunction:
+  Type: AWS::Lambda::Function
+  Properties:
+    DurableConfig:
+      ExecutionTimeout: 900          # 15 minutes
+      RetentionPeriodInDays: 1       # Short retention
+    Environment:
+      Variables:
+        LOG_LEVEL: DEBUG
+        ENVIRONMENT: development
+```
+
+**Production:**
+
+```yaml
+DurableFunction:
+  Type: AWS::Lambda::Function
+  Properties:
+    DurableConfig:
+      ExecutionTimeout: 86400        # 24 hours
+      RetentionPeriodInDays: 30      # Long retention
+    Environment:
+      Variables:
+        LOG_LEVEL: INFO
+        ENVIRONMENT: production
+```
+
+## Multi-Environment Deployment
+
+**CDK with Stages:**
+
+```typescript
+const app = new cdk.App();
+
+new DurableFunctionStack(app, 'DurableFunction-Dev', {
+  env: { account: '123456789012', region: 'us-east-1' },
+  stage: 'dev',
+  durableConfig: {
+    executionTimeout: cdk.Duration.minutes(15),
+    retentionPeriod: cdk.Duration.days(1)
+  }
+});
+
+new DurableFunctionStack(app, 'DurableFunction-Prod', {
+  env: { account: '123456789012', region: 'us-east-1' },
+  stage: 'prod',
+  durableConfig: {
+    executionTimeout: cdk.Duration.hours(24),
+    retentionPeriod: cdk.Duration.days(30)
+  }
+});
+```
+
 ## Invocation Examples
 
-**⚠️ Critical:** Always use qualified function name (version, alias, or `$LATEST`).
+### Critical Requirements
 
-### Synchronous (RequestResponse)
+**⚠️ Important Invocation Rules:**
+
+1. **Qualified Function Name Required**: You MUST provide a qualified function name with version, alias, or `:$LATEST`
+2. **Idempotency with durable-execution-name**: Use this parameter to ensure the same execution name always refers to the same execution
+3. **Binary Format**: Use `--cli-binary-format raw-in-base64-out` to avoid base64 encoding issues
+
+### Synchronous Invocation (RequestResponse)
+
+Synchronous invocation waits for the function to complete and returns the result immediately. Suitable for short workflows.
+
 ```bash
 aws lambda invoke \
   --function-name 'myDurableFunction:$LATEST' \
   --invocation-type RequestResponse \
   --durable-execution-name "execution-123" \
-  --payload '{"userId":"12345"}' \
+  --payload '{"userId":"12345","action":"process"}' \
   --cli-binary-format raw-in-base64-out \
+  --output json \
   response.json
+
+# View the response
+cat response.json
 ```
 
-### Asynchronous (Event)
+**When to use RequestResponse:**
+
+- Short-running workflows (under 15 minutes total)
+- When you need the result immediately
+- Interactive applications requiring synchronous responses
+
+### Asynchronous Invocation (Event)
+
+Asynchronous invocation returns immediately with the execution ID. Ideal for long-running workflows.
+
 ```bash
 aws lambda invoke \
   --function-name 'myDurableFunction:$LATEST' \
   --invocation-type Event \
   --durable-execution-name "background-task-456" \
-  --payload '{"orderId":"ORD-789"}' \
+  --payload '{"orderId":"ORD-789","amount":99.99}' \
+  --cli-binary-format raw-in-base64-out \
+  --output json \
+  response.json
+
+# Response contains execution ID, not the result
+cat response.json
+```
+
+**When to use Event:**
+
+- Long-running workflows (hours, days, or longer)
+- Background processing tasks
+- Workflows with wait operations or human-in-the-loop steps
+
+### Idempotency with durable-execution-name
+
+The `--durable-execution-name` parameter ensures that the same execution is never created twice:
+
+```bash
+# First invocation - creates new execution
+aws lambda invoke \
+  --function-name 'myDurableFunction:$LATEST' \
+  --invocation-type RequestResponse \
+  --durable-execution-name "order-processing-ORD-123" \
+  --payload '{"orderId":"ORD-123"}' \
+  --cli-binary-format raw-in-base64-out \
+  response.json
+
+# Second invocation with same execution name - returns existing execution result
+aws lambda invoke \
+  --function-name 'myDurableFunction:$LATEST' \
+  --invocation-type RequestResponse \
+  --durable-execution-name "order-processing-ORD-123" \
+  --payload '{"orderId":"ORD-123"}' \
   --cli-binary-format raw-in-base64-out \
   response.json
 ```
 
-### Idempotency with durable-execution-name
-The `--durable-execution-name` parameter ensures the same execution is never created twice. Second invocation with same name returns existing execution result.
+### Using Specific Function Versions
 
-## Environment Configuration
+Durable functions require qualified ARNs (version, alias, or `$LATEST`):
 
-**Development:**
-```yaml
-DurableConfig:
-  ExecutionTimeout: 900          # 15 minutes
-  RetentionPeriodInDays: 1
+```bash
+# ✅ Invoke specific version
+aws lambda invoke \
+  --function-name 'myDurableFunction:1' \
+  --invocation-type RequestResponse \
+  --durable-execution-name "versioned-exec-1" \
+  --payload '{"test":"data"}' \
+  --cli-binary-format raw-in-base64-out \
+  response.json
+
+# ✅ Invoke using alias
+aws lambda invoke \
+  --function-name 'myDurableFunction:production' \
+  --invocation-type RequestResponse \
+  --durable-execution-name "prod-exec-1" \
+  --payload '{"test":"data"}' \
+  --cli-binary-format raw-in-base64-out \
+  response.json
+
+# ❌ Unqualified - will fail!
+aws lambda invoke \
+  --function-name 'myDurableFunction' \
+  --payload '{"test":"data"}' \
+  response.json
+# Error: Durable execution requires qualified function identifier
 ```
 
-**Production:**
+## Monitoring and Observability
+
+**CloudWatch Logs:**
+
 ```yaml
-DurableConfig:
-  ExecutionTimeout: 86400        # 24 hours
-  RetentionPeriodInDays: 30
+DurableFunction:
+  Type: AWS::Lambda::Function
+  Properties:
+    # ... other properties
+    LoggingConfig:
+      LogFormat: JSON
+      LogGroup: !Ref DurableFunctionLogGroup
+
+DurableFunctionLogGroup:
+  Type: AWS::Logs::LogGroup
+  Properties:
+    LogGroupName: /aws/lambda/myDurableFunction
+    RetentionInDays: 7
 ```
 
-## Troubleshooting
+**CloudWatch Alarms:**
 
-| Issue | Solution |
-|-------|---------|
-| Function doesn't checkpoint | Verify `DurableConfig` is set and role has policy |
-| `Unqualified ARN` error | Use version, alias, or `$LATEST` |
-| `CheckpointDurableExecutions` denied | Add `AWSLambdaBasicDurableExecutionRolePolicy` |
+```yaml
+DurableFunctionErrorAlarm:
+  Type: AWS::CloudWatch::Alarm
+  Properties:
+    AlarmName: DurableFunction-Errors
+    MetricName: Errors
+    Namespace: AWS/Lambda
+    Statistic: Sum
+    Period: 300
+    EvaluationPeriods: 1
+    Threshold: 5
+    ComparisonOperator: GreaterThanThreshold
+    Dimensions:
+      - Name: FunctionName
+        Value: !Ref DurableFunction
+```
+
+## Best Practices
+
+1. **Always use qualified ARNs** (versions or aliases) for invocation
+2. **Set appropriate execution timeouts** based on workflow duration
+3. **Configure retention periods** to balance cost and debugging needs
+4. **Use aliases** for production deployments
+5. **Grant minimal IAM permissions** - only what's needed
+6. **Enable structured logging** (JSON format)
+7. **Set up CloudWatch alarms** for errors and throttles
+8. **Use environment variables** for configuration
+9. **Deploy to multiple environments** (dev, staging, prod)
+10. **Version your infrastructure code** alongside function code
+
+## Common issues
+
+### Function Not Durable
+
+**Issue:** Function executes but doesn't checkpoint.
+
+**Solution:** Verify `DurableConfig` is set and role has checkpoint permissions.
+
+### Invocation Fails with "Unqualified ARN"
+
+**Issue:** `InvalidParameterValueException: Durable execution requires qualified function identifier`
+
+**Solution:** Use version, alias, or `$LATEST`:
+
+```bash
+# ✅ Correct
+aws lambda invoke --function-name myFunction:prod ...
+aws lambda invoke --function-name myFunction:1 ...
+
+# ❌ Wrong
+aws lambda invoke --function-name myFunction ...
+```
+
+### Checkpoint Permission Denied
+
+**Issue:** `AccessDeniedException: User is not authorized to perform: lambda:CheckpointDurableExecution`
+
+**Solution:** Add `AWSLambdaBasicDurableExecutionRolePolicy` to execution role.

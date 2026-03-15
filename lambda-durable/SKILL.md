@@ -21,6 +21,12 @@ Before building a durable function, verify the user has:
    - Python: 3.11+ (Lambda runtimes 3.13+ have SDK pre-installed; for 3.11-3.12 use OCI/container image)
 3. **IaC tool** (one of): SAM CLI ≥ 1.153.1, CDK ≥ v2.237.1, or direct Lambda deployment
 4. **Ask the user** which language (TS/JS/Python) and which IaC framework (SAM/CDK/CloudFormation) if not clear
+5. **Ask** to create a git repo for the project if one doesn't exist already
+
+### Error Scenarios
+
+- **Unsupported Language:** State "Durable Execution SDK is not yet available for [language]" and suggest TS/JS or Python.
+- **Unsupported IaC Framework:** State "[framework] might not support Lambda durable functions yet" and suggest SAM/CDK/CloudFormation.
 
 ## SDK Installation
 
@@ -28,7 +34,6 @@ Before building a durable function, verify the user has:
 ```bash
 npm install @aws/durable-execution-sdk-js
 npm install --save-dev @aws/durable-execution-sdk-js-testing
-npm install --save-dev @aws/durable-execution-sdk-js-eslint-plugin
 ```
 
 **Python:**
@@ -40,13 +45,15 @@ pip install aws-durable-execution-sdk-python-testing
 ## IAM Requirements (CRITICAL)
 
 The Lambda execution role **MUST** have `AWSLambdaBasicDurableExecutionRolePolicy` attached. This includes:
-- `lambda:CheckpointDurableExecutions` — persist execution state
+- `lambda:CheckpointDurableExecution` — persist execution state
 - `lambda:GetDurableExecutionState` — retrieve execution state
 - CloudWatch Logs permissions
 
+See: https://docs.aws.amazon.com/lambda/latest/dg/durable-security.html
+
 Additional permissions needed for:
 - **Durable invokes:** `lambda:InvokeFunction` on target function ARNs
-- **External callbacks:** `lambda:SendDurableExecutionCallbackSuccess`, `lambda:SendDurableExecutionCallbackHeartbeat`, `lambda:SendDurableExecutionCallbackFailure`
+- **External callbacks:** `lambda:SendDurableExecutionCallbackSuccess`, `lambda:SendDurableExecutionCallbackFailure`
 
 ## Invocation Requirements (CRITICAL)
 
@@ -89,21 +96,34 @@ def handler(event: dict, context: DurableContext) -> dict:
 
 ---
 
+## Python API Differences
+
+The Python SDK differs from TypeScript in several key areas:
+
+- **Steps**: Use `@durable_step` decorator + `context.step(my_step(args))`, or inline `context.step(lambda _: ..., name='...')`. Prefer the decorator for automatic step naming.
+- **Wait**: `context.wait(duration=Duration.from_seconds(n), name='...')`
+- **Exceptions**: `ExecutionError` (permanent), `InvocationError` (transient), `CallbackError` (callback failures)
+- **Testing**: Use `DurableFunctionTestRunner` class directly — instantiate with handler, use context manager, call `run(input=...)`
+
+---
+
 ## Reference Docs (load on demand)
 
 Route the user's question to the appropriate reference file. Read the file before answering.
 
 | User is asking about... | Load this file |
 |---|---|
-| Getting started, basic setup, project structure, ESLint, common patterns | `refs/getting-started.md` |
+| Getting started, basic setup, project structure, ESLint, Jest setup | `refs/getting-started.md` |
 | **Replay model, determinism, non-deterministic bugs** (CRITICAL — read this for ANY durable function work) | `refs/replay-model-rules.md` |
 | Steps, atomic operations, retry config, step semantics, custom serialization | `refs/step-operations.md` |
 | Waits, delays, callbacks, external systems, polling, waitForCondition | `refs/wait-operations.md` |
 | Parallel execution, map operations, batch processing, concurrency, completion policies | `refs/concurrent-operations.md` |
-| Error handling, retry strategies, saga pattern, compensating transactions, circuit breaker | `refs/error-handling.md` |
-| Testing, LocalDurableTestRunner, CloudDurableTestRunner, test patterns | `refs/testing-patterns.md` |
+| Error handling, retry strategies, saga pattern, compensating transactions | `refs/error-handling.md` |
+| Advanced error handling, timeout handling, circuit breakers, conditional retries | `refs/advanced-error-handling.md` |
+| Testing, LocalDurableTestRunner, DurableFunctionTestRunner, cloud testing, flaky tests | `refs/testing-patterns.md` |
 | Deployment, CloudFormation, CDK, SAM, infrastructure, invocation | `refs/deployment-iac.md` |
-| Advanced patterns, GenAI agents, step semantics deep dive, nested workflows, custom serialization | `refs/advanced-patterns.md` |
+| Advanced patterns, GenAI agents, completion policies, step semantics, nested workflows | `refs/advanced-patterns.md` |
+| Troubleshooting, stuck execution, failed execution, debug execution ID, execution history | `refs/troubleshooting-executions.md` |
 
 **Rule:** When implementing ANY durable function, ALWAYS read `refs/replay-model-rules.md` first — replay model violations cause subtle, hard-to-debug issues.
 
@@ -139,6 +159,25 @@ Side effects outside steps execute on EVERY replay. Use `context.logger` (replay
 
 ---
 
+## Validation Guidelines
+
+When writing or reviewing durable function code, ALWAYS check for these replay model violations:
+
+1. **Non-deterministic code outside steps**: `Date.now()`, `Math.random()`, UUID generation, API calls, database queries must all be inside steps
+2. **Nested durable operations in step functions**: Cannot call `context.step()`, `context.wait()`, or `context.invoke()` inside a step function — use `context.runInChildContext()` instead
+3. **Closure mutations that won't persist**: Variables mutated inside steps are NOT preserved across replays — return values from steps instead
+4. **Side effects outside steps that repeat on replay**: Use `context.logger` for logging (it is replay-aware and deduplicates automatically)
+
+When implementing or modifying tests for durable functions, ALWAYS verify:
+
+1. All operations have descriptive names
+2. Tests get operations by NAME, never by index
+3. Replay behavior is tested with multiple invocations
+4. TypeScript: Use `LocalDurableTestRunner` for local testing
+5. Python: Use `DurableFunctionTestRunner` class directly
+
+---
+
 ## Common Patterns Summary
 
 | Pattern | Key Concept | Reference |
@@ -151,6 +190,8 @@ Side effects outside steps execute on EVERY replay. Use `context.logger` (replay
 | Async job polling | `context.waitForCondition()` with backoff | `refs/wait-operations.md` |
 | Parallel fan-out | `context.parallel()` for heterogeneous operations | `refs/concurrent-operations.md` |
 | Nested workflows | `context.invoke()` to call child durable functions | `refs/advanced-patterns.md` |
+| Timeout handling | Execution timeouts, step timeouts, circuit breakers | `refs/advanced-error-handling.md` |
+| Troubleshooting | Stuck/failed executions, execution history debugging | `refs/troubleshooting-executions.md` |
 
 ---
 
@@ -184,7 +225,8 @@ When implementing or reviewing tests for durable functions:
 - [ ] All operations have descriptive **names**
 - [ ] Tests get operations by **NAME** (`runner.getOperation('name')`), never by index
 - [ ] Replay behavior is tested with multiple invocations
-- [ ] Use `LocalDurableTestRunner` with `skipTime: true` for fast tests
+- [ ] TypeScript: Use `LocalDurableTestRunner` with `skipTime: true` for fast tests
+- [ ] Python: Use `DurableFunctionTestRunner` class directly with context manager
 - [ ] Wrap event data in `payload` object: `runner.run({ payload: { ... } })`
 - [ ] Cast `getResult()` to appropriate type
 - [ ] Callbacks use `waitForData(WaitingOperationStatus.STARTED)` before sending
