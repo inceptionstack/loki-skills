@@ -1,4 +1,3 @@
-# False positives: example/template connection strings in documentation
-postgresql://user:pass@host
-postgresql://user:password@host
-DATABASE_URL=postgresql://user:password@host/database
+# False positives for git-secrets
+# AWS documentation placeholder account ID used in CDK examples
+123456789012
