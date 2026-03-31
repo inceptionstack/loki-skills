@@ -1,8 +1,28 @@
 # loki-skills
 
-OpenClaw workspace skills used by [Loki](https://github.com/openclaw/openclaw) — an AI DevOps agent managing AWS infrastructure.
+Skills library for [Loki](https://github.com/inceptionstack/loki-agent) — the AI DevOps agent that lives in your AWS account. Works with both **OpenClaw** and **Hermes** agent runtimes.
 
-These skills were adapted for use with OpenClaw from [Kiro Powers](https://kiro.dev/powers/) and other sources. Some are custom-built. Each skill provides structured guidance (steering docs, reference material, and constraints) that help AI agents perform specialized tasks effectively.
+These skills were adapted from [Kiro Powers](https://kiro.dev/powers/) and other sources. Some are custom-built. Each skill provides structured guidance (steering docs, reference material, and constraints) that help AI agents perform specialized tasks effectively.
+
+## Usage
+
+**OpenClaw:** Clone into the workspace — skills are auto-discovered:
+
+```bash
+cd ~/.openclaw/workspace
+git clone https://github.com/inceptionstack/loki-skills.git skills
+```
+
+**Hermes:** Point `external_dirs` at the shared library:
+
+```yaml
+# In ~/.hermes/config.yaml
+skills:
+  external_dirs:
+    - ~/.openclaw/workspace/skills
+```
+
+Skills follow the [AgentSkills](https://agentskills.io) open standard and work with any compatible agent.
 
 ## Skills
 
@@ -37,9 +57,9 @@ These skills were adapted for use with OpenClaw from [Kiro Powers](https://kiro.
 
 ## Credits
 
-Most skills in this repo are adapted from [Kiro Powers](https://kiro.dev/powers/) — reusable capability packages built by AWS, partner companies, and the community for the [Kiro IDE](https://kiro.dev). Skills marked "Custom" were built independently for OpenClaw.
+Most skills in this repo are adapted from [Kiro Powers](https://kiro.dev/powers/) — reusable capability packages built by AWS, partner companies, and the community for the [Kiro IDE](https://kiro.dev). Skills marked "Custom" were built independently.
 
-The adaptation involved converting Kiro's power format (MCP servers, steering docs, hooks) into OpenClaw's skill format (SKILL.md + refs/). The underlying guidance, best practices, and reference material remain largely faithful to the original Kiro Powers.
+The adaptation involved converting Kiro's power format (MCP servers, steering docs, hooks) into the AgentSkills format (SKILL.md + refs/). The underlying guidance, best practices, and reference material remain largely faithful to the original Kiro Powers.
 
 ## License
 
