@@ -15,7 +15,7 @@ Learn how to build your own Kiro Powers with comprehensive guides covering every
 Whether you're documenting an MCP server, creating a CLI tool guide, or sharing best practices, this power walks you through the complete process including:
 - Understanding the two types of powers (Guided MCP Powers and Knowledge Base Powers)
 - Creating proper directory structures and required files
-- Writing effective POWER.md documentation with frontmatter
+- Writing effective SKILL.md documentation with frontmatter
 - Configuring mcp.json for MCP servers
 - Deciding when to split powers into multiple workflows
 - Interactive power creation with agent guidance
@@ -46,12 +46,12 @@ This power has two steering files:
 - **interactive** - Interactive agent-guided power creation workflow (read this after reviewing the documentation below)
 - **testing** - Complete guide to testing and updating powers
 
-**All conceptual knowledge is in this POWER.md file.** The steering files provide workflows for creation and testing.
+**All conceptual knowledge is in this SKILL.md file.** The steering files provide workflows for creation and testing.
 
 ## What is a Kiro Power?
 
 A **Kiro Power** is documentation that packages:
-1. **Knowledge** - POWER.md file with instructions, workflows, and best practices
+1. **Knowledge** - SKILL.md file with instructions, workflows, and best practices
 2. **Optional MCP Integration** - mcp.json configuration if the power needs MCP servers
 3. **Optional Steering** - Additional workflow guides for complex use cases
 
@@ -68,9 +68,9 @@ A **Kiro Power** is documentation that packages:
 **Definition**: Powers that connect to MCP servers with comprehensive documentation.
 
 **Structure:**
-- `POWER.md` - Onboarding, workflows, troubleshooting
+- `SKILL.md` - Onboarding, workflows, troubleshooting
 - `mcp.json` - MCP server configuration (required)
-- Optional: `steering/` for multiple workflow guides
+- Optional: `refs/` for multiple workflow guides
 
 **When to Create:**
 - You want to document an MCP server
@@ -103,11 +103,11 @@ author: "Your Name"
 **Definition**: Powers that provide pure documentation without MCP server connection.
 
 **Structure:**
-- `POWER.md` - Knowledge base content
-- Optional: `steering/` for organized documentation
+- `SKILL.md` - Knowledge base content
+- Optional: `refs/` for organized documentation
 - **No mcp.json** file (this is the key difference)
 
-**Important:** Knowledge Base Powers should usually include an **Onboarding section** in POWER.md to help users get started with the documented tool or knowledge.
+**Important:** Knowledge Base Powers should usually include an **Onboarding section** in SKILL.md to help users get started with the documented tool or knowledge.
 
 **Common Subtypes:**
 - **CLI Tool Guides** - Installation, usage, troubleshooting for command-line tools
@@ -199,14 +199,14 @@ Understanding where Kiro stores configuration and steering files:
 
 **Workspace Level:**
 ```
-.kiro/steering/
+.kiro/refs/
 ```
 - Workspace-specific steering files
 - Can be used as source for Knowledge Base Powers
 
 **User Level:**
 ```
-~/.kiro/steering/
+~/.kiro/refs/
 ```
 - Global steering files
 - Available across all workspaces
@@ -290,7 +290,7 @@ Examples: `supabase-local-dev`, `supabase-remote-dev`
 
 Structure for documenting command-line tools:
 
-**POWER.md Contents:**
+**SKILL.md Contents:**
 1. **Onboarding Section**
    - CLI installation instructions
    - Prerequisites (Node.js, Python, system requirements)
@@ -378,7 +378,7 @@ tool-name deploy --production
 
 Structure for documenting patterns and guidelines:
 
-**POWER.md Contents:**
+**SKILL.md Contents:**
 1. **Overview**: What the best practices cover
 2. **Principles**: Core principles to follow
 3. **Patterns**: Specific patterns with examples
@@ -415,7 +415,7 @@ process(userInput); // Direct use without validation
 
 Structure for problem-solving documentation:
 
-**POWER.md Contents:**
+**SKILL.md Contents:**
 1. **Common Problems**: List of frequent issues
 2. **Diagnostic Steps**: How to identify problems
 3. **Solutions**: Step-by-step fixes
@@ -457,7 +457,7 @@ Structure for problem-solving documentation:
 
 Structure for quick reference guides:
 
-**POWER.md Contents:**
+**SKILL.md Contents:**
 1. **Quick Reference**: Cheat sheet format
 2. **API Reference**: Function/endpoint documentation
 3. **Examples**: Common usage examples
@@ -510,29 +510,29 @@ Powers can have three different structures depending on complexity:
 ```
 weather/
 ├── mcp.json    # MCP server config
-└── POWER.md    # Everything: metadata + docs + steering
+└── SKILL.md    # Everything: metadata + docs + steering
 ```
-**Use for:** Most powers. Everything agents need is in POWER.md.
+**Use for:** Most powers. Everything agents need is in SKILL.md.
 
 ### Pattern B: Multiple Workflow Power
 ```
 playwright/
 ├── mcp.json         # MCP server config
-├── POWER.md         # Overview + common patterns
-└── steering/        # Dynamic content loaded on-demand
+├── SKILL.md         # Overview + common patterns
+└── refs/        # Dynamic content loaded on-demand
     ├── web-scraping.md
     ├── e2e-testing.md
     └── performance.md
 ```
-**Use when:** POWER.md >500 lines OR independent workflows OR progressive discovery needed.
+**Use when:** SKILL.md >500 lines OR independent workflows OR progressive discovery needed.
 
 **Note:** Steering files can contain workflows, troubleshooting guides, advanced features, references - any dynamic content loaded on-demand.
 
 ### Pattern C: Knowledge Base Power (No MCP)
 ```
 testing-strategies/
-├── POWER.md         # Overview of all topics
-└── steering/        # Knowledge repository
+├── SKILL.md         # Overview of all topics
+└── refs/        # Knowledge repository
     ├── unit-testing.md
     ├── integration-testing.md
     └── e2e-testing.md
@@ -542,7 +542,7 @@ testing-strategies/
 ### Required Components
 
 **ALL powers MUST have:**
-1. **POWER.md** (required) - With complete frontmatter metadata
+1. **SKILL.md** (required) - With complete frontmatter metadata
    - name, displayName, description (required)
    - keywords, author (optional but recommended)
    - Overview and documentation
@@ -551,15 +551,15 @@ testing-strategies/
 2. **mcp.json** (required) - MCP server configuration
 
 **Powers with multiple workflows MAY have:**
-3. **steering/** directory (optional) - Additional dynamic content
+3. **refs/** directory (optional) - Additional dynamic content
 
 ### File Purpose
 
 | Component | Purpose | Read By | When |
 |-----------|---------|---------|------|
-| `POWER.md` | **REQUIRED:** Metadata + primary documentation | Agent | **First** (via activate action) |
+| `SKILL.md` | **REQUIRED:** Metadata + primary documentation | Agent | **First** (via activate action) |
 | `mcp.json` | Technical MCP server config (if power has tools) | System | Installation |
-| `steering/*.md` | Dynamic content (workflows, troubleshooting, advanced features, references) | Agent | **On-demand** (via readSteering action) |
+| `refs/*.md` | Dynamic content (workflows, troubleshooting, advanced features, references) | Agent | **On-demand** (via readSteering action) |
 
 **Context Strategy:** Agents get steeringFiles list from activate, then load specific files only when needed.
 
@@ -628,7 +628,7 @@ testing-strategies/
 
 ---
 
-## POWER.md Frontmatter Format
+## SKILL.md Frontmatter Format
 
 **Only these 5 fields exist:**
 ```yaml
@@ -652,7 +652,7 @@ author: "Your Name"
 
 **IMPORTANT:** Fields like `version`, `tags`, `repository`, `license` do NOT exist and should NOT be used.
 
-**Recommended POWER.md Sections:**
+**Recommended SKILL.md Sections:**
 - **Overview**: What the power does and why it's useful
 - **Available Steering Files**: List of steering files (if any)
 - **Available MCP Servers**: Server and tool listings (if Guided MCP Power)
@@ -661,10 +661,10 @@ author: "Your Name"
 - **Troubleshooting**: Common errors and solutions
 - **Configuration**: Setup requirements (if any)
 
-### Optional `steering/*.md` Files
+### Optional `refs/*.md` Files
 
 **Only create when:**
-- POWER.md exceeds ~500 lines (context preservation)
+- SKILL.md exceeds ~500 lines (context preservation)
 - Power has independent workflows that don't need to be loaded together
 - Dynamic content loading improves usability
 
@@ -676,7 +676,7 @@ author: "Your Name"
 - Reference docs (reference.md)
 
 **When NOT to create:**
-- Power is simple (< 500 lines in POWER.md)
+- Power is simple (< 500 lines in SKILL.md)
 - All content is closely related
 - Agents need all information upfront
 
@@ -740,14 +740,14 @@ The testing guide covers:
 
 ### File Organization
 
-- Put metadata in POWER.md frontmatter (never in mcp.json)
-- Only create steering/ directory when needed (>500 lines or dynamic loading)
+- Put metadata in SKILL.md frontmatter (never in mcp.json)
+- Only create refs/ directory when needed (>500 lines or dynamic loading)
 - Use workspace paths for development: `{workspace}/powers/`
 - Default to single power (only split with strong conviction)
 
 ### MCP Configuration
 
-- Never include display metadata in mcp.json (goes in POWER.md frontmatter)
+- Never include display metadata in mcp.json (goes in SKILL.md frontmatter)
 - Document environment variables clearly
 - Provide MCP configuration reference: https://kiro.dev/docs/mcp/configuration/
 - Only disable tools with explicit user consent

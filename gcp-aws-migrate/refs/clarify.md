@@ -47,9 +47,9 @@ At least one discovery artifact must exist to proceed.
 - **Full migration**: `gcp-resource-inventory.json` or `billing-profile.json` exists (may also have `ai-workload-profile.json`)
 - **AI-only migration**: ONLY `ai-workload-profile.json` exists (no infrastructure or billing artifacts)
 
-**If AI-only**: Read `steering/clarify-ai-only.md` NOW and follow that flow. Skip all remaining steps below.
+**If AI-only**: Read `refs/clarify-ai-only.md` NOW and follow that flow. Skip all remaining steps below.
 
-> **HARD GATE — AI-Only Path:** You MUST read `steering/clarify-ai-only.md` before presenting any questions. The question text, answer options, and interpretation rules are ONLY in that file — they are NOT in this file. Do NOT fabricate questions from the summaries above.
+> **HARD GATE — AI-Only Path:** You MUST read `refs/clarify-ai-only.md` before presenting any questions. The question text, answer options, and interpretation rules are ONLY in that file — they are NOT in this file. Do NOT fabricate questions from the summaries above.
 
 ### Discovery Summary
 
@@ -122,10 +122,10 @@ Record extracted values. Questions whose answers are fully determined by extract
 >
 > | Active Category | File to Read                    |
 > | --------------- | ------------------------------- |
-> | A (always)      | `steering/clarify-global.md`    |
-> | B or C          | `steering/clarify-compute.md`   |
-> | D               | `steering/clarify-database.md`  |
-> | F               | `steering/clarify-ai.md`        |
+> | A (always)      | `refs/clarify-global.md`    |
+> | B or C          | `refs/clarify-compute.md`   |
+> | D               | `refs/clarify-database.md`  |
+> | F               | `refs/clarify-ai.md`        |
 >
 > **Do NOT proceed to Step 4 until you have read every applicable file above.**
 

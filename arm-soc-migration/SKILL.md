@@ -32,7 +32,7 @@ This power has the following steering files for detailed workflow guidance:
 - **validation** — Validation and Testing: cross-compilation verification, performance benchmarking, functional test suites
 - **constraints** — Migration constraints and safety rules that apply to all Arm SoC migrations
 
-All conceptual knowledge is in this POWER.md file. The steering files provide detailed workflow examples with complete code samples.
+All conceptual knowledge is in this SKILL.md file. The steering files provide detailed workflow examples with complete code samples.
 
 ## Onboarding
 

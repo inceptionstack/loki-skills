@@ -9,13 +9,13 @@ When working with AgentCore, you should retrieve the specialized steering files 
 **To get the Memory steering file:**
 ```bash
 # Ask Kiro to fetch and save the memory steering documentation
-"Get the AgentCore Memory steering file and save it to .kiro/steering/"
+"Get the AgentCore Memory steering file and save it to .kiro/refs/"
 ```
 
 **To get the Gateway steering file:**
 ```bash
 # Ask Kiro to fetch and save the gateway steering documentation
-"Get the AgentCore Gateway steering file and save it to .kiro/steering/"
+"Get the AgentCore Gateway steering file and save it to .kiro/refs/"
 ```
 
 These steering files provide detailed guidance on:

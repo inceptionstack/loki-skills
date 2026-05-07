@@ -10,7 +10,7 @@ The parent `estimate.md` selects the pricing mode before loading this file.
 
 **Price lookup order:**
 
-1. **`steering/cached-prices.md` (primary)** — Look up Bedrock model pricing and source provider pricing by table. Set `pricing_source: "cached"`.
+1. **`refs/cached-prices.md` (primary)** — Look up Bedrock model pricing and source provider pricing by table. Set `pricing_source: "cached"`.
 2. **MCP (secondary)** — If a model is NOT in cached-prices.md and MCP is available, query `get_pricing("AmazonBedrock", "us-east-1")` with model filter. Set `pricing_source: "live"`.
 
 For typical migrations (Claude, Llama, Nova, Mistral, DeepSeek, Gemma, OpenAI gpt-oss, Gemini source pricing), ALL prices are in `cached-prices.md`. Zero MCP calls needed.

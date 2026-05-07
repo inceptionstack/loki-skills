@@ -10,7 +10,7 @@ The parent `estimate.md` determines pricing source before loading this file.
 
 **Price lookup order for each AWS service in `aws-design.json`:**
 
-1. **`steering/cached-prices.md` (primary)** — Read once. Look up each service by table. If found, use the price directly. No MCP call needed. Set `pricing_source: "cached"`.
+1. **`refs/cached-prices.md` (primary)** — Read once. Look up each service by table. If found, use the price directly. No MCP call needed. Set `pricing_source: "cached"`.
 2. **MCP with recipes (secondary)** — If a service is NOT in cached-prices.md and MCP is available, use the Pricing Recipes table below. Set `pricing_source: "live"`.
 
 For typical migrations (Fargate, Aurora/RDS, Aurora Serverless v2, S3, ALB, NAT Gateway, Lambda, Secrets Manager, CloudWatch, ElastiCache, DynamoDB), ALL prices are in `cached-prices.md`. Zero MCP calls needed.
@@ -163,7 +163,7 @@ Include migrate/stay decision factors:
 
 ## Output
 
-Read `steering/schema-estimate-infra.md` for the `estimation-infra.json` schema and validation checklist, then write `estimation-infra.json` to `$MIGRATION_DIR/`.
+Read `refs/schema-estimate-infra.md` for the `estimation-infra.json` schema and validation checklist, then write `estimation-infra.json` to `$MIGRATION_DIR/`.
 
 ## Present Summary
 
@@ -179,7 +179,7 @@ Keep it under 25 lines. The user can ask for details or re-read `estimation-infr
 
 ## Generate Phase Integration
 
-The Generate phase (`steering/generate.md`) uses `estimation-infra.json` as follows:
+The Generate phase (`refs/generate.md`) uses `estimation-infra.json` as follows:
 
 1. **`projected_costs.breakdown`** — Budget allocation per cluster migration phase
 2. **`optimization_opportunities`** — Which optimizations to implement and when (some during initial migration, some post-migration)

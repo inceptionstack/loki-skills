@@ -17,7 +17,7 @@ Read from `$MIGRATION_DIR/`:
 - `preferences.json` (REQUIRED) — User preferences including target region, sizing, compliance
 - `gcp-resource-clusters.json` (REQUIRED) — Cluster dependency graph for ordering
 
-Reference files (read as needed): `steering/design-ref-index.md` and domain-specific files (`steering/design-ref-compute.md`, `steering/design-ref-database.md`, `steering/design-ref-storage.md`, `steering/design-ref-networking.md`, `steering/design-ref-messaging.md`, `steering/design-ref-ai.md`).
+Reference files (read as needed): `refs/design-ref-index.md` and domain-specific files (`refs/design-ref-compute.md`, `refs/design-ref-database.md`, `refs/design-ref-storage.md`, `refs/design-ref-networking.md`, `refs/design-ref-messaging.md`, `refs/design-ref-ai.md`).
 
 If any REQUIRED file is missing: **STOP**. Output: "Missing required artifact: [filename]. Complete the prior phase that produces it."
 
@@ -70,7 +70,7 @@ For each domain with resources in the generation manifest:
 
 **General rules:**
 
-- Consult `steering/design-ref-*.md` for AWS configuration best practices
+- Consult `refs/design-ref-*.md` for AWS configuration best practices
 - A single GCP resource may map to multiple AWS resources (1:Many expansion)
 - Use `gcp_config` values from `aws-design.json` to populate resource attributes
 - For `confidence: "inferred"` resources, add comment: `# Inferred mapping — verify configuration`

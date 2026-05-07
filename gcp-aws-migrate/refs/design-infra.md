@@ -23,7 +23,7 @@ For each cluster, process `primary_resources` first, then `secondary_resources` 
 For each PRIMARY resource in the cluster:
 
 1. Extract GCP type (e.g., `google_sql_database_instance`)
-2. Look up in `steering/design-ref-fast-path.md` → Direct Mappings table
+2. Look up in `refs/design-ref-fast-path.md` → Direct Mappings table
 3. If found (deterministic 1:1 match): assign AWS service with confidence = `deterministic`
 4. If not found: proceed to Pass 2
 
@@ -31,7 +31,7 @@ For each PRIMARY resource in the cluster:
 
 For resources not covered by fast-path:
 
-1. Determine service category (via `steering/design-ref-index.md`):
+1. Determine service category (via `refs/design-ref-index.md`):
    - `google_compute_instance` → compute
    - `google_cloudfunctions_function` → compute
    - `google_sql_database_instance` → database
@@ -44,7 +44,7 @@ For resources not covered by fast-path:
    - If pattern match: use that category
    - If no pattern match: **STOP**. Output: "Unknown GCP resource type: [type]. Not in fast-path.md or index.md. Cannot auto-map. Please file an issue with this resource type."
 
-2. Load rubric from corresponding `steering/design-ref-*.md` file (e.g., `design-ref-compute.md`, `design-ref-database.md`)
+2. Load rubric from corresponding `refs/design-ref-*.md` file (e.g., `design-ref-compute.md`, `design-ref-database.md`)
 
 3. Evaluate 6 criteria (1-sentence each):
    - **Eliminators**: Feature incompatibility (hard blocker)
@@ -60,7 +60,7 @@ For resources not covered by fast-path:
 
 For each SECONDARY resource:
 
-1. Use `steering/design-ref-index.md` for category
+1. Use `refs/design-ref-index.md` for category
 2. Apply fast-path (most secondaries have deterministic mappings)
 3. If rubric needed: apply same 6-criteria approach
 

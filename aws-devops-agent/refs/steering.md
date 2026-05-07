@@ -7,7 +7,7 @@ alwaysApply: true
 
 ## Tool Selection
 - **For standard operations**: Use `aws___call_aws` with `cli_command="aws devops-agent <operation> ..."` for all non-streaming DevOps Agent operations
-- **For streaming APIs (SendMessage)**: Use `aws___run_script` with Python boto3 code — `call_aws` cannot handle EventStream responses. See the Chat-First Pattern in POWER.md for the full streaming code
+- **For streaming APIs (SendMessage)**: Use `aws___run_script` with Python boto3 code — `call_aws` cannot handle EventStream responses. See the Chat-First Pattern in SKILL.md for the full streaming code
 - **For knowledge discovery**: Use `aws___search_documentation` or `aws___retrieve_skill`
 - **For API help**: Use `aws___suggest_aws_commands` when unsure of parameters
 - **For long-running tasks**: Use `aws___get_tasks` to poll status of tasks started by `call_aws` or `run_script`
@@ -23,7 +23,7 @@ Best for: cost optimization, architecture review, topology mapping, knowledge di
 
 ```
 1. aws___call_aws(cli_command="aws devops-agent create-chat --agent-space-id SPACE_ID --region us-east-1") → executionId
-2. aws___run_script → send_message with streaming dedup (see POWER.md for full code)
+2. aws___run_script → send_message with streaming dedup (see SKILL.md for full code)
    - Use `response['events']` to iterate the EventStream
    - Track block type from `contentBlockStart` events
    - Only extract text from blocks with type 'text' (skip 'final_response', 'chat_title')

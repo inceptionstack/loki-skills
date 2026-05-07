@@ -205,9 +205,9 @@ Do NOT proceed until `atx custom def list --json` succeeds.
 
 Remote mode requires additional permissions (Lambda invoke, S3, KMS, Secrets Manager,
 CloudWatch). These are generated and attached as part of the deployment flow — see
-[steering/remote-execution.md](steering/remote-execution.md).
+[refs/remote-execution.md](refs/remote-execution.md).
 
-See [steering/cli-reference.md](steering/cli-reference.md) for the full permission list.
+See [refs/cli-reference.md](refs/cli-reference.md) for the full permission list.
 
 ### 5. AWS CDK (Remote Mode Only)
 
@@ -232,7 +232,7 @@ aws cloudformation describe-stacks --stack-name AtxInfrastructureStack \
 ```
 If deployed (`CREATE_COMPLETE` or `UPDATE_COMPLETE`): proceed to job submission.
 If `NOT_DEPLOYED` or any other status: get explicit user consent before deploying.
-See [steering/remote-execution.md](steering/remote-execution.md) for full deployment instructions.
+See [refs/remote-execution.md](refs/remote-execution.md) for full deployment instructions.
 
 ## Workflow
 
@@ -273,7 +273,7 @@ aws s3 sync s3://user-bucket/repos/ s3://${SOURCE_BUCKET}/repos/ --exclude "*" -
 ```
 Then submit a batch job with one job per zip, each pointing to
 `s3://${SOURCE_BUCKET}/repos/<filename>.zip`. The container handles zip extraction
-automatically. See [steering/multi-transformation.md](steering/multi-transformation.md) for batch submission.
+automatically. See [refs/multi-transformation.md](refs/multi-transformation.md) for batch submission.
 The managed source bucket has a 7-day lifecycle — copied zips auto-delete.
 
 **Local mode:** Download and extract each zip locally:
@@ -421,7 +421,7 @@ Perform lightweight inspection only — check config files for key signals:
 Cross-reference detected signals against TDs from Step 2. Only match TDs that
 actually exist in the user's account.
 
-See [steering/repo-analysis.md](steering/repo-analysis.md) for full detection commands.
+See [refs/repo-analysis.md](refs/repo-analysis.md) for full detection commands.
 
 ### Step 4: Present Match Report
 
@@ -467,7 +467,7 @@ target runtime or if a custom Docker build is needed.
    build tools, and any other dependencies), determine whether everything
    needed is available in the pre-built image listed above
 2. If **yes** → use the pre-built image path (no Docker required). Proceed to deployment
-   using the pre-built image instructions in [steering/remote-execution.md](steering/remote-execution.md).
+   using the pre-built image instructions in [refs/remote-execution.md](refs/remote-execution.md).
 3. If **no** → use the custom image path (Docker required). Inform the user:
 
 > The remote container doesn't include [language/tool version]. To run this
@@ -476,7 +476,7 @@ target runtime or if a custom Docker build is needed.
 > — about 5-10 minutes. Want me to proceed?
 
 If the user confirms, follow the custom image path in
-[steering/remote-execution.md](steering/remote-execution.md): clear `prebuiltImageUri`,
+[refs/remote-execution.md](refs/remote-execution.md): clear `prebuiltImageUri`,
 customize the Dockerfile, and deploy.
 
 If the user declines, suggest local mode as an alternative (if the tools are
@@ -634,8 +634,8 @@ until user confirms.
 
 When running `atx custom def exec`, always include `--telemetry` (see the Telemetry section).
 
-- **1 repo**: See [steering/single-transformation.md](steering/single-transformation.md)
-- **Multiple repos**: See [steering/multi-transformation.md](steering/multi-transformation.md)
+- **1 repo**: See [refs/single-transformation.md](refs/single-transformation.md)
+- **Multiple repos**: See [refs/multi-transformation.md](refs/multi-transformation.md)
 
 ## Execution Modes
 
@@ -650,7 +650,7 @@ Mode inference:
 - 10+ repos without preference → Recommend remote, explain local cap recommendation of 3 concurrent
 - 1-9 repos without preference → Local, note remote available
 
-See [steering/remote-execution.md](steering/remote-execution.md) for infrastructure setup.
+See [refs/remote-execution.md](refs/remote-execution.md) for infrastructure setup.
 
 ## Critical Rules
 
@@ -750,19 +750,19 @@ s3://atx-custom-output-{account-id}/
 If the user explicitly asks to download, provide the command but let them run it:
 `aws s3 cp s3://atx-custom-output-{account-id}/transformations/{job-name}/{conversation-id}/code.zip ./code.zip`
 
-Bulk results summary: `~/.aws/atx/custom/atx-agent-session/transformation-summaries/` — see [steering/results-synthesis.md](steering/results-synthesis.md).
+Bulk results summary: `~/.aws/atx/custom/atx-agent-session/transformation-summaries/` — see [refs/results-synthesis.md](refs/results-synthesis.md).
 
 ## References
 
 | Reference | When to Use |
 |-----------|-------------|
-| [repo-analysis.md](steering/repo-analysis.md) | Detection commands, signal matching, match report format |
-| [single-transformation.md](steering/single-transformation.md) | Applying one TD to one repo (local or remote) |
-| [multi-transformation.md](steering/multi-transformation.md) | Applying TDs to multiple repos in parallel |
-| [remote-execution.md](steering/remote-execution.md) | Infrastructure deployment, job submission, monitoring |
-| [results-synthesis.md](steering/results-synthesis.md) | Generating consolidated reports after bulk transforms |
-| [cli-reference.md](steering/cli-reference.md) | ATX CLI flags, commands, env vars, IAM permissions |
-| [troubleshooting.md](steering/troubleshooting.md) | Error resolution, debugging, quality improvement |
+| [repo-analysis.md](refs/repo-analysis.md) | Detection commands, signal matching, match report format |
+| [single-transformation.md](refs/single-transformation.md) | Applying one TD to one repo (local or remote) |
+| [multi-transformation.md](refs/multi-transformation.md) | Applying TDs to multiple repos in parallel |
+| [remote-execution.md](refs/remote-execution.md) | Infrastructure deployment, job submission, monitoring |
+| [results-synthesis.md](refs/results-synthesis.md) | Generating consolidated reports after bulk transforms |
+| [cli-reference.md](refs/cli-reference.md) | ATX CLI flags, commands, env vars, IAM permissions |
+| [troubleshooting.md](refs/troubleshooting.md) | Error resolution, debugging, quality improvement |
 
 ## License
 AWS Service Terms. This power is provided by AWS and is subject to the AWS Customer Agreement and applicable AWS service terms.

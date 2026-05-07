@@ -107,7 +107,7 @@ For small projects, skip the full clustering pipeline. Instead:
 
 4. **Set depth:** Networking cluster = depth 0. All other clusters = depth 1. (No Kahn's algorithm needed.)
 
-5. **Load** `steering/schema-discover-iac.md` and write output files
+5. **Load** `refs/schema-discover-iac.md` and write output files
    (`gcp-resource-inventory.json`, `gcp-resource-clusters.json`) using the same schema.
    Add to metadata: `"clustering_mode": "simplified"`.
 
@@ -118,7 +118,7 @@ phases (clarify, design, estimate, generate) work identically regardless of clus
 
 ## Step 3: Classify Resources (PRIMARY vs SECONDARY)
 
-1. Read `steering/clustering-classification-rules.md` completely
+1. Read `refs/clustering-classification-rules.md` completely
 2. For EACH resource from Step 1, apply classification rules in priority order:
    - **Priority 1**: Check if in PRIMARY list → mark `classification: "PRIMARY"`, assign `tier`, continue
    - **Priority 2**: Check if type matches SECONDARY patterns → mark `classification: "SECONDARY"` with `secondary_role` (one of: `identity`, `access_control`, `network_path`, `configuration`, `encryption`, `orchestration`)
@@ -131,7 +131,7 @@ phases (clarify, design, estimate, generate) work identically regardless of clus
 
 ## Step 4: Build Dependency Edges and Populate Serves
 
-1. Read `steering/typed-edges-strategy.md` completely
+1. Read `refs/typed-edges-strategy.md` completely
 2. For EACH resource from Step 1, extract references from `raw_hcl`:
    - Extract all `google_*\.[\w\.]+` patterns
    - Classify edge type by field name/value context (see typed-edges-strategy.md)
@@ -145,7 +145,7 @@ phases (clarify, design, estimate, generate) work identically regardless of clus
 
 ## Step 5: Calculate Topological Depth
 
-1. Read `steering/depth-calculation.md` completely
+1. Read `refs/depth-calculation.md` completely
 2. Use Kahn's algorithm (or equivalent topological sort) to assign `depth` field:
    - Depth 0: resources with no incoming dependencies
    - Depth N: resources where at least one dependency is depth N-1
@@ -155,7 +155,7 @@ phases (clarify, design, estimate, generate) work identically regardless of clus
 
 ## Step 6: Apply Clustering Algorithm
 
-1. Read `steering/clustering-algorithm.md` completely
+1. Read `refs/clustering-algorithm.md` completely
 2. Apply Rules 1-6 in exact priority order:
    - **Rule 1: Networking Cluster** — `google_compute_network` + all `network_path` secondaries → 1 cluster
    - **Rule 2: Same-Type Grouping** — ALL primaries of identical type → 1 cluster (not one per resource)
@@ -179,7 +179,7 @@ phases (clarify, design, estimate, generate) work identically regardless of clus
 ### 7a: Write gcp-resource-inventory.json
 
 1. Create file: `$MIGRATION_DIR/gcp-resource-inventory.json`
-2. Load `steering/schema-discover-iac.md` and write with the exact schema for `gcp-resource-inventory.json`
+2. Load `refs/schema-discover-iac.md` and write with the exact schema for `gcp-resource-inventory.json`
 
 **CRITICAL field names (use EXACTLY these):**
 
@@ -277,7 +277,7 @@ After generating output files, the parent `discover.md` handles the phase status
 
 ## Design Phase Integration
 
-The Design phase (`steering/design.md`) uses both outputs:
+The Design phase (`refs/design.md`) uses both outputs:
 
 1. **From gcp-resource-clusters.json:**
    - `creation_order` — evaluates clusters depth-first (foundational first)

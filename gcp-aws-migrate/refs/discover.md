@@ -18,7 +18,7 @@ Multiple artifacts can be produced in a single run — they are not mutually exc
      - `[A] Resume: Continue with [latest run]`
      - `[B] Fresh: Create new migration run`
      - `[C] Cancel`
-   - **If resuming:** Set `$MIGRATION_DIR` to the selected run's directory. Read its `.phase-status.json` and skip to the appropriate phase per the State Machine in POWER.md.
+   - **If resuming:** Set `$MIGRATION_DIR` to the selected run's directory. Read its `.phase-status.json` and skip to the appropriate phase per the State Machine in SKILL.md.
    - **If fresh or no existing runs:** Continue to step 2.
 2. **Resolve the current local timestamp FIRST** by running the shell command `date "+%m%d-%H%M"` in the user's project directory to get the actual `MMDD-HHMM` value in the user's local timezone. **Do NOT hardcode, guess, or infer the timestamp — always execute the command and use its output.** Then create `.migration/[MMDD-HHMM]/` directory using the resolved value (e.g., if the command returns `0226-1430`, create `.migration/0226-1430/`). Set `$MIGRATION_DIR` to this new directory.
 3. Create `.migration/.gitignore` file (if not already present) with exact content:
@@ -52,7 +52,7 @@ Multiple artifacts can be produced in a single run — they are not mutually exc
 
 ## Step 1: Load Phase Status Schema
 
-Load `steering/schema-phase-status.md` now. Each sub-discovery file loads its own output schema — do not load them here.
+Load `refs/schema-phase-status.md` now. Each sub-discovery file loads its own output schema — do not load them here.
 
 ## Step 2: Scan for Input Sources and Run Sub-Discoveries
 

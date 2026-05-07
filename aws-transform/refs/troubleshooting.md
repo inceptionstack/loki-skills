@@ -6,7 +6,7 @@
 |-------|------------|
 | `atx` not found | Install: `curl -fsSL https://transform-cli.awsstatic.com/install.sh` piped to `bash` |
 | AWS credentials error or expiry | Run `aws sts get-caller-identity`. Check `AWS_PROFILE` or access key env vars |
-| Permission denied | Local mode: need `transform-custom:*` — see Prerequisites → IAM Permissions in POWER.md. Remote mode: generate and attach policies via `npx ts-node generate-caller-policy.ts` — see remote-execution.md |
+| Permission denied | Local mode: need `transform-custom:*` — see Prerequisites → IAM Permissions in SKILL.md. Remote mode: generate and attach policies via `npx ts-node generate-caller-policy.ts` — see remote-execution.md |
 | Network error | Resolve region: `REGION=${AWS_REGION:-${AWS_DEFAULT_REGION:-$(aws configure get region 2>/dev/null)}}; REGION=${REGION:-us-east-1}`. Check access to `transform-custom.${REGION}.api.aws` |
 | Build fails during transform | Verify build command works locally first. Try interactive mode for debugging |
 | Transform not found | Run `atx custom def list --json` to check available TDs |
@@ -28,7 +28,7 @@ authentication or 403 errors), work through these steps with the user:
 aws secretsmanager describe-secret --secret-id "atx/github-token" --region "$REGION" 2>/dev/null && echo "EXISTS" || echo "MISSING"
 aws secretsmanager describe-secret --secret-id "atx/ssh-key" --region "$REGION" 2>/dev/null && echo "EXISTS" || echo "MISSING"
 ```
-If missing, guide the user through setup — see Step 1 in POWER.md.
+If missing, guide the user through setup — see Step 1 in SKILL.md.
 
 **2. Does the PAT have the right scope?**
 GitHub fine-grained PATs can be scoped to specific repos. If the user created a
