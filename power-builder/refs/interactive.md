@@ -181,7 +181,7 @@ Ask the user to provide the MCP server configuration. Through conversation:
 1. **Request the MCP config:** "Can you provide the MCP server configuration for this server? This could be from documentation, a README, or an existing config file."
 
 2. **Check Kiro's MCP schema conformance:**
-   - Verify it matches Kiro's MCP server schema format (documented in mcp.json Format section of POWER.md)
+   - Verify it matches Kiro's MCP server schema format (documented in mcp.json Format section of SKILL.md)
    - If the config doesn't match Kiro's schema, work with the user to convert it
 
 3. **Convert if needed:**
@@ -204,7 +204,7 @@ Through conversation or by reading documentation, collect information about each
 - Optional parameters
 - Example usage scenarios
 
-We don't need to add MCP tool information to the POWER.md file since this information is provided at runtime. This is for your information only.
+We don't need to add MCP tool information to the SKILL.md file since this information is provided at runtime. This is for your information only.
 
 ### 2.5: Tool Disabling (With User Consent)
 
@@ -258,9 +258,9 @@ cd {workspace}/powers/{power-name}
 
 Tell user: "Creating power directory at: {workspace}/powers/{power-name}"
 
-**Generate POWER.md:**
+**Generate SKILL.md:**
 
-Create POWER.md with this structure:
+Create SKILL.md with this structure:
 
 ```markdown
 ---
@@ -424,18 +424,18 @@ author: "{author name}"
 
 **Should you create steering files?**
 
-Only create steering/ directory if:
+Only create refs/ directory if:
 
-- POWER.md exceeds ~500 lines (context preservation)
+- SKILL.md exceeds ~500 lines (context preservation)
 - Power has distinct independent workflows (e.g., web-scraping vs e2e-testing vs performance)
 - Users don't need to know about all workflows upfront (progressive discovery)
 
 **If creating steering files:**
-- Keep overview and common patterns in POWER.md
-- Split independent workflows into steering/ files (e.g., `steering/advanced-automation.md`)
-- POWER.md should list available steering files with descriptions
+- Keep overview and common patterns in SKILL.md
+- Split independent workflows into refs/ files (e.g., `refs/advanced-automation.md`)
+- SKILL.md should list available steering files with descriptions
 
-**Default approach:** Single POWER.md file. Only split when content size or workflow independence requires it.
+**Default approach:** Single SKILL.md file. Only split when content size or workflow independence requires it.
 
 **Generate mcp.json:**
 
@@ -460,10 +460,10 @@ Create mcp.json:
 ✅ Power files created successfully!
 
 Files created:
-- POWER.md: Main documentation with onboarding, workflows, and troubleshooting
+- SKILL.md: Main documentation with onboarding, workflows, and troubleshooting
 - mcp.json: MCP server configuration
 {if steering files created:}
-- steering/: Workflow-specific guides
+- refs/: Workflow-specific guides
 
 Location: {workspace}/powers/{power-name}/
 
@@ -534,8 +534,8 @@ For each major task or workflow, collect:
 **Check for existing steering files:**
 
 Look in these directories for existing steering files that might be relevant:
-- Workspace steering: `.kiro/steering/`
-- User steering: `~/.kiro/steering/`
+- Workspace steering: `.kiro/refs/`
+- User steering: `~/.kiro/refs/`
 
 **If you find existing steering files:**
 
@@ -551,7 +551,7 @@ Create power directory:
 mkdir -p {workspace}/powers/{power-name}
 ```
 
-Create POWER.md:
+Create SKILL.md:
 
 ```markdown
 ---
@@ -705,7 +705,7 @@ author: "{author}"
 Copy them to the power's steering directory:
 ```bash
 mkdir {workspace}/powers/{power-name}/steering
-cp {source-steering-file} {workspace}/powers/{power-name}/steering/
+cp {source-steering-file} {workspace}/powers/{power-name}/refs/
 ```
 
 **Do NOT create mcp.json** (Knowledge Base Powers don't have MCP servers)
@@ -715,9 +715,9 @@ cp {source-steering-file} {workspace}/powers/{power-name}/steering/
 ✅ CLI Tool Power created successfully!
 
 Files created:
-- POWER.md: CLI installation, usage, and troubleshooting
+- SKILL.md: CLI installation, usage, and troubleshooting
 {if steering files copied:}
-- steering/{file-names}: Additional documentation
+- refs/{file-names}: Additional documentation
 
 Location: {workspace}/powers/{power-name}/
 
@@ -757,27 +757,27 @@ Use the same approach as Section 2.3:
 
 **Structure strategy:**
 
-**Default: Single POWER.md file**
+**Default: Single SKILL.md file**
 
 If the total content is manageable (<500 lines):
-- Keep everything in POWER.md
-- POWER.md contains all the knowledge
+- Keep everything in SKILL.md
+- SKILL.md contains all the knowledge
 - Simple, straightforward structure
 
 **Only if content becomes too large (>500 lines):**
 
-Use POWER.md as an index/table of contents:
-- POWER.md provides:
+Use SKILL.md as an index/table of contents:
+- SKILL.md provides:
   - Overview of all topics
   - List of available steering files with descriptions
   - Guidance on when to use each steering file
 - Break knowledge into logical topic areas
-- Create steering files for each topic area (steering/topic-name.md)
+- Create steering files for each topic area (refs/topic-name.md)
 - Agent reads specific steering files based on user needs
 
 **Example structure for large knowledge base:**
 
-POWER.md (acts as index):
+SKILL.md (acts as index):
 ```markdown
 ## Available Steering Files
 
@@ -788,23 +788,23 @@ POWER.md (acts as index):
 Call action "readSteering" to access specific topics as needed.
 ```
 
-steering/ directory:
+refs/ directory:
 - topic-1.md - Deep content on topic 1
 - topic-2.md - Deep content on topic 2
 - topic-3.md - Deep content on topic 3
 
-**Generate POWER.md:**
+**Generate SKILL.md:**
 
-Create POWER.md with appropriate structure based on content size.
+Create SKILL.md with appropriate structure based on content size.
 
 **Tell the user:**
 ```
 ✅ Knowledge Base Power created successfully!
 
 Files created:
-- POWER.md: {structure description}
+- SKILL.md: {structure description}
 {if steering files:}
-- steering/{file-names}: Topic-specific content
+- refs/{file-names}: Topic-specific content
 
 Location: {workspace}/powers/{power-name}/
 
@@ -840,31 +840,31 @@ Same approach as CLI workflow - check for related steering files in workspace an
 
 **Structure recommendations:**
 
-**If all best practices fit in POWER.md (<500 lines):**
-- Create single POWER.md with all content
+**If all best practices fit in SKILL.md (<500 lines):**
+- Create single SKILL.md with all content
 - Recommended sections: Core Principles, Patterns, Examples, Quick Reference
 - Keep everything in one file for easy reference
 
 **If content is too large (>500 lines):**
-- POWER.md: Overview + list of principle areas with descriptions
-- steering/: Separate files for different principle categories
+- SKILL.md: Overview + list of principle areas with descriptions
+- refs/: Separate files for different principle categories
 - Example structure:
-  - steering/security-principles.md - Security best practices
-  - steering/performance-principles.md - Performance best practices
-  - steering/architecture-principles.md - Architecture best practices
+  - refs/security-principles.md - Security best practices
+  - refs/performance-principles.md - Performance best practices
+  - refs/architecture-principles.md - Architecture best practices
 
-**Generate POWER.md:**
+**Generate SKILL.md:**
 
-Create POWER.md with appropriate structure based on content size.
+Create SKILL.md with appropriate structure based on content size.
 
 **Tell the user:**
 ```
 ✅ Best Practices Power created successfully!
 
 Files created:
-- POWER.md: {structure description}
+- SKILL.md: {structure description}
 {if steering files:}
-- steering/{file-names}: Category-specific best practices
+- refs/{file-names}: Category-specific best practices
 
 Location: {workspace}/powers/{power-name}/
 
@@ -890,47 +890,47 @@ For Workflow Documentation, Troubleshooting Guides, and Reference Documentation:
 
 **Structure strategy:**
 
-**Single POWER.md approach (default, <500 lines):**
+**Single SKILL.md approach (default, <500 lines):**
 
-- **Workflow Documentation**: Step-by-step procedures directly in POWER.md
-- **Troubleshooting Guide**: Problem → Solution format directly in POWER.md
-- **Reference Documentation**: Tables, quick lookups, API reference in POWER.md
+- **Workflow Documentation**: Step-by-step procedures directly in SKILL.md
+- **Troubleshooting Guide**: Problem → Solution format directly in SKILL.md
+- **Reference Documentation**: Tables, quick lookups, API reference in SKILL.md
 
 Keep everything in one file if the content is manageable.
 
 **Multiple steering files approach (if too large, >500 lines):**
 
-- **POWER.md**: Acts as overview + index of topics
-- **steering/**: Break content into logical sections
+- **SKILL.md**: Acts as overview + index of topics
+- **refs/**: Break content into logical sections
 
 Examples by type:
 
 - **Workflow Documentation**:
-  - POWER.md: Overview of all workflows
-  - steering/workflow-1.md, steering/workflow-2.md, etc.
+  - SKILL.md: Overview of all workflows
+  - refs/workflow-1.md, refs/workflow-2.md, etc.
 
 - **Troubleshooting Guide**:
-  - POWER.md: Overview + index of problem categories
-  - steering/category-1-issues.md, steering/category-2-issues.md, etc.
+  - SKILL.md: Overview + index of problem categories
+  - refs/category-1-issues.md, refs/category-2-issues.md, etc.
 
 - **Reference Documentation**:
-  - POWER.md: Quick reference overview
-  - steering/api-reference.md, steering/command-reference.md, etc.
+  - SKILL.md: Quick reference overview
+  - refs/api-reference.md, refs/command-reference.md, etc.
 
-**Key principle:** Only split into steering files if POWER.md becomes too large (>500 lines). Otherwise, keep content in a single POWER.md file for simplicity.
+**Key principle:** Only split into steering files if SKILL.md becomes too large (>500 lines). Otherwise, keep content in a single SKILL.md file for simplicity.
 
-**Generate POWER.md:**
+**Generate SKILL.md:**
 
-Create POWER.md with appropriate structure based on the knowledge type and content size.
+Create SKILL.md with appropriate structure based on the knowledge type and content size.
 
 **Tell the user:**
 ```
 ✅ Knowledge Base Power created successfully!
 
 Files created:
-- POWER.md: {structure description}
+- SKILL.md: {structure description}
 {if steering files:}
-- steering/{file-names}: Topic-specific content
+- refs/{file-names}: Topic-specific content
 
 Location: {workspace}/powers/{power-name}/
 
@@ -983,7 +983,7 @@ Through conversation, suggest the split to the user:
 If they agree:
 - You'll need to determine which workflow this power covers
 - Update the power name to: `{tool-name}-{workflow-name}`
-- Regenerate POWER.md with the specific workflow focus
+- Regenerate SKILL.md with the specific workflow focus
 - Note that they may want to create a second power for the other workflow later
 
 **Most common outcome:**
@@ -1023,10 +1023,10 @@ Call action "readSteering" with powerName="power-builder", steeringFile="testing
 ### Power Creation Rules
 - **Use only the 5 valid frontmatter fields**: name, displayName, description, keywords, author
 - **Never use non-existent fields**: version, tags, repository, license
-- **Put metadata in POWER.md frontmatter** - never in mcp.json
+- **Put metadata in SKILL.md frontmatter** - never in mcp.json
 - **Include mcp.json** for Guided MCP Powers only
 - **Omit mcp.json** for Knowledge Base Powers
-- **Only create steering/ directory when needed** (>500 lines or dynamic loading)
+- **Only create refs/ directory when needed** (>500 lines or dynamic loading)
 - **Avoid broad keywords** - Generic keywords like "test", "debug", "help", "api" cause false activations and annoy users, leading to uninstallation
 
 ### MCP Configuration
@@ -1051,7 +1051,7 @@ Call action "readSteering" with powerName="power-builder", steeringFile="testing
 
 ### Field Validation
 
-**Only these 5 fields exist in POWER.md frontmatter:**
+**Only these 5 fields exist in SKILL.md frontmatter:**
 - `name` (required) - lowercase kebab-case
 - `displayName` (required) - human-readable title
 - `description` (required) - clear, concise (max 3 sentences)
@@ -1076,7 +1076,7 @@ After you've created and tested your power, you can share it with others:
 
 **To share a power locally, provide the full path to the specific power directory:**
 
-1. Each power must be in its own directory with POWER.md (+ optional mcp.json, steering/)
+1. Each power must be in its own directory with SKILL.md (+ optional mcp.json, refs/)
 2. In Kiro Powers UI: Click "Add Custom Power" button at the top
 3. Select "Local Directory" option
 4. Provide the full absolute path to the specific power directory
@@ -1086,9 +1086,9 @@ After you've created and tested your power, you can share it with others:
 ```bash
 # Your power directory structure
 /path/to/workspace/powers/monitor-website-uptime/
-├── POWER.md
+├── SKILL.md
 ├── mcp.json
-└── steering/
+└── refs/
     └── advanced.md
 
 # In Powers UI, use this path:
@@ -1113,7 +1113,7 @@ If the power has mcp.json with user-specific configuration, sanitize it before s
    - System file paths → `"/path/to/your/directory"` or `"PLACEHOLDER_PATH"`
    - User-specific env vars → Placeholder values
 
-2. **Document placeholders in POWER.md:**
+2. **Document placeholders in SKILL.md:**
    - Add "MCP Config Placeholders" section explaining each placeholder
    - Provide instructions for users to replace placeholders with their own values
 
@@ -1165,7 +1165,7 @@ If the power has mcp.json with user-specific configuration, sanitize it before s
    - System file paths → `"/path/to/your/directory"` or `"PLACEHOLDER_PATH"`
    - User-specific env vars → Placeholder values
 
-2. **Document placeholders in POWER.md:**
+2. **Document placeholders in SKILL.md:**
    - Add "MCP Config Placeholders" section explaining each placeholder
    - Provide instructions for users to replace placeholders with their own values
 
@@ -1175,7 +1175,7 @@ If the power has mcp.json with user-specific configuration, sanitize it before s
 - Clear use cases and examples
 - Public GitHub repository
 - **Sanitized mcp.json** with placeholders for sensitive values
-- **MCP Config Placeholders section in POWER.md** documenting all placeholders
+- **MCP Config Placeholders section in SKILL.md** documenting all placeholders
 - 512x512 PNG icon (if required)
 
 After submission, the Kiro team will review your power. If approved, it will appear in the recommended powers list for all Kiro users.

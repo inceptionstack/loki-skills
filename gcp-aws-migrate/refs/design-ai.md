@@ -20,10 +20,10 @@ Read `$MIGRATION_DIR/preferences.json` → `ai_constraints` (if present). If abs
 
 **Load source-specific design reference based on `ai_source`:**
 
-- `"gemini"` → load `steering/design-ref-ai-gemini-to-bedrock.md`
-- `"openai"` → load `steering/design-ref-ai-openai-to-bedrock.md`
+- `"gemini"` → load `refs/design-ref-ai-gemini-to-bedrock.md`
+- `"openai"` → load `refs/design-ref-ai-openai-to-bedrock.md`
 - `"both"` → load both files
-- `"other"` or absent → load `steering/design-ref-ai.md` (traditional ML rubric)
+- `"other"` or absent → load `refs/design-ref-ai.md` (traditional ML rubric)
 
 ---
 

@@ -58,7 +58,7 @@ before proceeding.
 
 ### Telemetry
 
-When running `atx custom def exec`, always include the `--telemetry` flag (see the Telemetry section in POWER.md). Format:
+When running `atx custom def exec`, always include the `--telemetry` flag (see the Telemetry section in SKILL.md). Format:
 `--telemetry "client=kiro,agent=kiro,executionMode=<local|remote>"`
 
 - `client` is always `kiro`
@@ -86,7 +86,7 @@ chmod +x ~/.aws/atx/custom/atx-agent-session/run-<repo-name>.sh
 nohup ~/.aws/atx/custom/atx-agent-session/run-<repo-name>.sh > ~/.aws/atx/custom/atx-agent-session/<repo-name>.log 2>&1 &
 echo $! > ~/.aws/atx/custom/atx-agent-session/<repo-name>.pid
 ```
-Omit `--configuration` if no config needed. Include `--telemetry` always — see POWER.md for details. Launch each repo's script in rapid
+Omit `--configuration` if no config needed. Include `--telemetry` always — see SKILL.md for details. Launch each repo's script in rapid
 succession — do NOT wait between launches. Each runner script is backgrounded
 via nohup; the exit code is captured to `~/.aws/atx/custom/atx-agent-session/<repo-name>.exit` when ATX finishes.
 
@@ -127,7 +127,7 @@ Submit jobs via the batch Lambda in chunks of up to 128. If there are more than
 = 4 calls of 128 + 128 + 128 + 116). Each call returns its own `batchId`. Track
 all batch IDs for monitoring.
 
-Include the `environment` field on each job to set the language version matching the transformation's target (e.g., `"JAVA_VERSION":"21"` for a Java upgrade targeting 21). Include `--telemetry` in each job's `command` string always (see POWER.md):
+Include the `environment` field on each job to set the language version matching the transformation's target (e.g., `"JAVA_VERSION":"21"` for a Java upgrade targeting 21). Include `--telemetry` in each job's `command` string always (see SKILL.md):
 ```bash
 aws lambda invoke --function-name atx-trigger-batch-jobs \
   --payload '{"batchName":"<name>-chunk-1","jobs":[{"source":"<url>","command":"atx custom def exec -n <td> -p /source/<project> -x -t --telemetry \"client=kiro,agent=kiro,executionMode=remote\"","jobName":"<name>","environment":{"JAVA_VERSION":"<target>"}}]}' \

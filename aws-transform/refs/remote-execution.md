@@ -50,7 +50,7 @@ customize the Dockerfile, and build locally. This requires Docker on the user's
 machine.
 
 You determine which mode to use during Step 6 (Verify Runtime Compatibility)
-in POWER.md. Do NOT ask the user to choose — you decide automatically based
+in SKILL.md. Do NOT ask the user to choose — you decide automatically based
 on whether the pre-built image has everything needed for the transformation.
 
 ### Pre-built Image Runtimes
@@ -238,7 +238,7 @@ Do not try to manually fix individual CloudFormation errors.
 (with `atx/ssh-key` configured), or S3 paths within the CDK-managed source bucket
 (`atx-source-code-{account}`). The container's IAM role cannot read from arbitrary
 S3 buckets. If the user provides zips in their own S3 bucket, copy them to the
-managed source bucket first (see Step 1 in POWER.md).
+managed source bucket first (see Step 1 in SKILL.md).
 
 Single job:
 ```bash
@@ -258,7 +258,7 @@ aws lambda invoke --function-name atx-trigger-batch-jobs \
 
 SSH git URLs (`git@github.com:org/repo.git` or `ssh://git@github.com/org/repo.git`)
 are passed directly to the Lambda — the container clones them remotely. This requires
-an SSH private key stored in Secrets Manager as `atx/ssh-key`. See Step 1 in POWER.md
+an SSH private key stored in Secrets Manager as `atx/ssh-key`. See Step 1 in SKILL.md
 for setup instructions.
 
 If the SSH key is not configured, the clone will fail inside the container. Do NOT
@@ -295,7 +295,7 @@ aws s3 cp s3://atx-custom-output-{account-id}/transformations/<job-name>/<conver
 ## Private Repository Access
 
 **Note:** If the user has private repos, credentials should already be configured
-during Step 1 (Collect Repositories) in POWER.md. This section documents the
+during Step 1 (Collect Repositories) in SKILL.md. This section documents the
 mechanism for reference.
 
 The container fetches credentials from AWS Secrets Manager at startup. Three secret types:
@@ -343,7 +343,7 @@ The default container includes Java (8, 11, 17, 21, 25), Python (3.8–3.14), No
 (16–24), Maven, Gradle, gcc/g++, make, and common build tools.
 
 If a transformation requires a language or tool not included, you handle this
-automatically during Step 6 (Verify Container Compatibility) — see POWER.md. The
+automatically during Step 6 (Verify Container Compatibility) — see SKILL.md. The
 Dockerfile has a clearly marked `CUSTOM LANGUAGES AND TOOLS` section where new
 `RUN` commands should be inserted. After editing, redeploy with `cd "$ATX_INFRA_DIR" && ./setup.sh` — CDK
 auto-detects Dockerfile changes and rebuilds the image.

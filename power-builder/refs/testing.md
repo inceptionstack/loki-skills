@@ -9,7 +9,7 @@ This guide shows you how to test powers you're building before sharing them.
 ```
 1. Create Power Directory in Workspace
    ↓
-2. Write Power Files (POWER.md, mcp.json, steering/)
+2. Write Power Files (SKILL.md, mcp.json, refs/)
    ↓
 3. Install Power Locally via Powers UI
    ↓
@@ -26,9 +26,9 @@ This guide shows you how to test powers you're building before sharing them.
 
 1. Power directory created in workspace: `{workspace}/powers/{power-name}/`
 2. All power files generated:
-   - POWER.md with frontmatter and documentation
+   - SKILL.md with frontmatter and documentation
    - mcp.json (if Guided MCP Power)
-   - steering/ directory (if needed)
+   - refs/ directory (if needed)
 
 **If you haven't created the power files yet:**
 
@@ -123,7 +123,7 @@ Ask the user to make natural language requests that should trigger the power bas
 - Workflow executes successfully
 
 **If the power doesn't trigger:**
-- Review the keywords in POWER.md frontmatter
+- Review the keywords in SKILL.md frontmatter
 - Ensure keywords match common user language
 - Make description more specific about use cases
 - Add 5-7 varied keywords that users might say
@@ -144,13 +144,13 @@ Work with the user to test the power's main functionality with realistic request
 
 **Expected workflow:**
 - Agent activates power for relevant query
-- Agent reads POWER.md documentation
+- Agent reads SKILL.md documentation
 - Agent calls action="use" with correct parameters (if Guided MCP Power)
 - Operation succeeds
 
 **If it fails:**
 - Check error message returned
-- Review the POWER.md documentation for accuracy
+- Review the SKILL.md documentation for accuracy
 - Verify MCP tool names are exact matches (if applicable)
 - Update documentation with clearer instructions
 
@@ -161,7 +161,7 @@ Work with the user to test the power's main functionality with realistic request
 Ask the user to make requests that should trigger specific steering file usage:
 
 **Example:**
-- If power has `steering/advanced-automation.md`:
+- If power has `refs/advanced-automation.md`:
   - User: "Show me advanced automation patterns with this tool"
   - User: "What are some complex use cases?"
 
@@ -171,8 +171,8 @@ Ask the user to make requests that should trigger specific steering file usage:
 - Steering files load successfully
 
 **If steering files aren't being read:**
-- Ensure POWER.md references available steering files
-- Make steering file descriptions clear in POWER.md
+- Ensure SKILL.md references available steering files
+- Make steering file descriptions clear in SKILL.md
 - Test with more specific queries that need steering guidance
 
 ---
@@ -183,12 +183,12 @@ Ask the user to make requests that should trigger specific steering file usage:
 
 #### Issue: "Power not found"
 **Causes:**
-- Directory doesn't have POWER.md
-- POWER.md frontmatter has errors
+- Directory doesn't have SKILL.md
+- SKILL.md frontmatter has errors
 - Path is incorrect
 
 **Fix:**
-1. Verify POWER.md exists with valid frontmatter
+1. Verify SKILL.md exists with valid frontmatter
 2. Check required fields: name, displayName, description
 3. Ensure directory name matches `name` field
 4. Verify the path provided is correct (absolute path)
@@ -202,7 +202,7 @@ Ask the user to make requests that should trigger specific steering file usage:
 **Fix:**
 1. Test MCP server directly: `npx -y package-name`
 2. List available tools using action="activate"
-3. Update POWER.md with exact tool names
+3. Update SKILL.md with exact tool names
 4. Guide user to update the power in Powers UI
 
 #### Issue: "Invalid arguments for tool"
@@ -213,7 +213,7 @@ Ask the user to make requests that should trigger specific steering file usage:
 
 **Fix:**
 1. Check MCP tool schema from action="activate" response
-2. Update POWER.md with correct parameter names and types
+2. Update SKILL.md with correct parameter names and types
 3. Show complete examples with all required params
 
 #### Issue: "Agent doesn't activate the power"
@@ -225,7 +225,7 @@ Ask the user to make requests that should trigger specific steering file usage:
 **Fix:**
 1. Make description more specific (what problem does it solve?)
 2. Add 5-7 relevant keywords that match user queries
-3. Add clear use case examples in POWER.md
+3. Add clear use case examples in SKILL.md
 
 #### Issue: "Agent can't follow the workflow"
 **Causes:**
@@ -294,9 +294,9 @@ Before considering the power complete, verify:
 
 ### Structure (Required)
 - [ ] Directory name matches frontmatter name
-- [ ] POWER.md exists with valid frontmatter
+- [ ] SKILL.md exists with valid frontmatter
 - [ ] mcp.json uses mcpServers format (if power has tools)
-- [ ] No metadata in mcp.json (goes in POWER.md)
+- [ ] No metadata in mcp.json (goes in SKILL.md)
 
 ### Content Quality (Recommended)
 These improve power quality but are not strictly required:

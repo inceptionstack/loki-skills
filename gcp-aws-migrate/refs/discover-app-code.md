@@ -270,7 +270,7 @@ If no Terraform files were provided, set `infrastructure: []`.
 
 ## Step 8: Generate ai-workload-profile.json
 
-Load `steering/schema-discover-ai.md` and generate output following the `ai-workload-profile.json` schema.
+Load `refs/schema-discover-ai.md` and generate output following the `ai-workload-profile.json` schema.
 
 **CRITICAL field names** — use EXACTLY these keys:
 
@@ -321,7 +321,7 @@ After generating the output file, the parent `discover.md` handles the phase sta
 
 ## Design Phase Integration
 
-The Design phase (`steering/design.md`) uses `ai-workload-profile.json`:
+The Design phase (`refs/design.md`) uses `ai-workload-profile.json`:
 
 1. **`summary.ai_source`** — Routes to the correct design reference: `"gemini"` → `ai-gemini-to-bedrock.md`, `"openai"` → `ai-openai-to-bedrock.md`, `"both"` → load both, `"other"` → `ai.md` (traditional ML)
 2. **`models`** — Determines which Bedrock models to recommend via the model selection decision tree

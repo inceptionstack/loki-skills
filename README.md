@@ -17,7 +17,9 @@ git clone https://github.com/inceptionstack/loki-skills.git skills
 
 ```bash
 git clone https://github.com/inceptionstack/loki-skills.git /tmp/loki-skills
-cp -r /tmp/loki-skills/*/ ~/.pi/agent/skills/
+for d in /tmp/loki-skills/*/; do
+  [ -d "$d" ] && cp -r "$d" ~/.pi/agent/skills/
+done
 ```
 
 ## Skills

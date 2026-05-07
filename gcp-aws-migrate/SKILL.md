@@ -38,7 +38,7 @@ If none of the above are found, stop and ask user to provide at least one source
 
 **AWS credentials** — Optional, improves cost estimation accuracy:
 
-- The power uses `steering/cached-prices.md` as the primary pricing source (±5-10% for infra, ±15-25% for AI)
+- The power uses `refs/cached-prices.md` as the primary pricing source (±5-10% for infra, ±15-25% for AI)
 - When cached pricing is unavailable or stale, the power falls back to the AWS Pricing MCP server for live rates
 - To enable the MCP fallback: configure valid AWS credentials locally (`aws configure` or `aws sso login`)
 - Any AWS account with read-only access works — the AWS Pricing API is a public, read-only API and does not need to be the target migration account
@@ -53,11 +53,11 @@ This is the execution controller. After completing each phase, consult this tabl
 
 | Current State   | Condition | Next Action                     |
 | --------------- | --------- | ------------------------------- |
-| `start`         | always    | Load `steering/discover.md`     |
-| `discover_done` | always    | Load `steering/clarify.md`      |
-| `clarify_done`  | always    | Load `steering/design.md`       |
-| `design_done`   | always    | Load `steering/estimate.md`     |
-| `estimate_done` | always    | Load `steering/generate.md`     |
+| `start`         | always    | Load `refs/discover.md`     |
+| `discover_done` | always    | Load `refs/clarify.md`      |
+| `clarify_done`  | always    | Load `refs/design.md`       |
+| `design_done`   | always    | Load `refs/estimate.md`     |
+| `estimate_done` | always    | Load `refs/generate.md`     |
 | `generate_done` | always    | Migration planning complete     |
 
 **How to determine current state:** Read `$MIGRATION_DIR/.phase-status.json` → check `phases` object → find the last phase with value `"completed"`.
@@ -149,12 +149,12 @@ This applies to all files written during any phase, including JSON artifacts, Te
 
 | Phase        | Inputs                                                                                                                                                                   | Outputs                                                                                                                                                                                   | Reference                  |
 | ------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------- |
-| **Discover** | `.tf` files, app source code, and/or billing exports (at least one required)                                                                                             | `gcp-resource-inventory.json`, `gcp-resource-clusters.json`, `ai-workload-profile.json`, `billing-profile.json`, `.phase-status.json` updated (outputs vary by input)                     | `steering/discover.md`     |
-| **Clarify**  | Discovery artifacts (`gcp-resource-inventory.json`, `gcp-resource-clusters.json`, `ai-workload-profile.json`, `billing-profile.json` — whichever exist)                  | `preferences.json`, `.phase-status.json` updated                                                                                                                                          | `steering/clarify.md`      |
-| **Design**   | `preferences.json` + discovery artifacts                                                                                                                                 | `aws-design.json` (infra), `aws-design-ai.json` (AI), `aws-design-billing.json` (billing-only)                                                                                            | `steering/design.md`       |
-| **Estimate** | `aws-design.json` or `aws-design-billing.json` or `aws-design-ai.json`, `preferences.json`                                                                               | `estimation-infra.json` or `estimation-ai.json` or `estimation-billing.json`, `.phase-status.json` updated                                                                                | `steering/estimate.md`     |
-| **Generate** | `estimation-infra.json` or `estimation-ai.json` or `estimation-billing.json`, `aws-design.json` or `aws-design-billing.json` or `aws-design-ai.json`, `preferences.json` | `generation-infra.json` or `generation-ai.json` or `generation-billing.json` + `terraform/`, `scripts/`, `ai-migration/`, `MIGRATION_GUIDE.md`, `README.md`, `.phase-status.json` updated | `steering/generate.md`     |
-| **Feedback** | `.phase-status.json` (discover completed minimum), all existing migration artifacts                                                                                      | `feedback.json`, `trace.json`, `.phase-status.json` updated                                                                                                                               | `steering/feedback.md`     |
+| **Discover** | `.tf` files, app source code, and/or billing exports (at least one required)                                                                                             | `gcp-resource-inventory.json`, `gcp-resource-clusters.json`, `ai-workload-profile.json`, `billing-profile.json`, `.phase-status.json` updated (outputs vary by input)                     | `refs/discover.md`     |
+| **Clarify**  | Discovery artifacts (`gcp-resource-inventory.json`, `gcp-resource-clusters.json`, `ai-workload-profile.json`, `billing-profile.json` — whichever exist)                  | `preferences.json`, `.phase-status.json` updated                                                                                                                                          | `refs/clarify.md`      |
+| **Design**   | `preferences.json` + discovery artifacts                                                                                                                                 | `aws-design.json` (infra), `aws-design-ai.json` (AI), `aws-design-billing.json` (billing-only)                                                                                            | `refs/design.md`       |
+| **Estimate** | `aws-design.json` or `aws-design-billing.json` or `aws-design-ai.json`, `preferences.json`                                                                               | `estimation-infra.json` or `estimation-ai.json` or `estimation-billing.json`, `.phase-status.json` updated                                                                                | `refs/estimate.md`     |
+| **Generate** | `estimation-infra.json` or `estimation-ai.json` or `estimation-billing.json`, `aws-design.json` or `aws-design-billing.json` or `aws-design-ai.json`, `preferences.json` | `generation-infra.json` or `generation-ai.json` or `generation-billing.json` + `terraform/`, `scripts/`, `ai-migration/`, `MIGRATION_GUIDE.md`, `README.md`, `.phase-status.json` updated | `refs/generate.md`     |
+| **Feedback** | `.phase-status.json` (discover completed minimum), all existing migration artifacts                                                                                      | `feedback.json`, `trace.json`, `.phase-status.json` updated                                                                                                                               | `refs/feedback.md`     |
 
 ---
 
@@ -175,7 +175,7 @@ This applies to all files written during any phase, including JSON artifacts, Te
 
 - Provides `get_pricing`, `get_pricing_service_codes`, `get_pricing_service_attributes` tools
 - Only needed during Estimate phase. Discover and Design do not require it.
-- Primary pricing source: `steering/cached-prices.md` (cached rates, ±5-10% for infra, ±15-25% for AI). MCP is secondary — used only for services not found in the cache.
+- Primary pricing source: `refs/cached-prices.md` (cached rates, ±5-10% for infra, ±15-25% for AI). MCP is secondary — used only for services not found in the cache.
 
 **Recommended setup** (better accuracy):
 
@@ -198,10 +198,10 @@ When invoked, the agent **MUST follow this exact sequence**:
    - If status is `in_progress`: Resume that phase (read corresponding steering file)
    - If status is `completed`: Advance to next phase (read next steering file)
    - Phase mapping for advancement:
-     - discover (completed) → Execute clarify (read `steering/clarify.md`)
-     - clarify (completed) → Execute design (read `steering/design.md`)
-     - design (completed) → Execute estimate (read `steering/estimate.md`)
-     - estimate (completed) → Execute generate (read `steering/generate.md`)
+     - discover (completed) → Execute clarify (read `refs/clarify.md`)
+     - clarify (completed) → Execute design (read `refs/design.md`)
+     - design (completed) → Execute estimate (read `refs/estimate.md`)
+     - estimate (completed) → Execute generate (read `refs/generate.md`)
      - generate (completed) → Migration complete
 
 3. **Read phase reference**: Load the full steering file for the target phase.
@@ -218,14 +218,14 @@ When invoked, the agent **MUST follow this exact sequence**:
      "Would you like to share quick feedback (5 optional questions + anonymized usage data) to help improve this tool? Your data never includes resource names, file paths, or account IDs.
      [A] Send feedback now
      [B] Wait until after the Estimate phase"
-     - If user picks **A** → Load `steering/feedback.md`, execute it, then continue to Clarify.
+     - If user picks **A** → Load `refs/feedback.md`, execute it, then continue to Clarify.
      - If user picks **B** → Continue to Clarify (feedback stays `"pending"`).
 
    - **After Estimate** (if `phases.feedback` is `"pending"`): Output to user:
      "Would you like to share quick feedback now? (5 optional questions + anonymized usage data)
      [A] Yes, share feedback
      [B] No thanks, continue to Generate"
-     - If user picks **A** → Load `steering/feedback.md`, execute it, then continue to Generate.
+     - If user picks **A** → Load `refs/feedback.md`, execute it, then continue to Generate.
      - If user picks **B** → Set `phases.feedback` to `"completed"`, update `last_updated`. Continue to Generate.
 
    - **After Generate**: No feedback offer. If `phases.feedback` is still `"pending"`, set it to `"completed"` and update `last_updated` (user had two chances and chose to defer/skip).
@@ -244,7 +244,7 @@ User can invoke the power again to resume from last completed phase.
 | ------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------ |
 | No GCP sources found (no `.tf`, no app code, no billing data) | Stop. Output: "No GCP sources detected. Provide at least one source type (Terraform files, application code, or billing exports) and try again." |
 | `.phase-status.json` missing phase gate                       | Stop. Output: "Cannot enter Phase X: Phase Y-1 not completed. Start from Phase Y or resume Phase Y-1."                                           |
-| awspricing unavailable after 3 attempts                       | Display user warning about ±5-25% accuracy. Use `steering/cached-prices.md`. Add `pricing_source: "cached"` to estimation.json.                  |
+| awspricing unavailable after 3 attempts                       | Display user warning about ±5-25% accuracy. Use `refs/cached-prices.md`. Add `pricing_source: "cached"` to estimation.json.                  |
 | User skips questions or says "use all defaults"               | Apply documented defaults from each category file. Phase 2 completes either way.                                                                 |
 | `aws-design.json` missing required clusters                   | Stop Phase 4. Output: "Re-run Phase 3 to generate missing cluster designs."                                                                      |
 
@@ -254,10 +254,10 @@ User can invoke the power again to resume from last completed phase.
 
 ```
 gcp-aws-migrate/
-├── POWER.md                                    ← You are here (orchestrator + state machine)
+├── SKILL.md                                    ← You are here (orchestrator + state machine)
 ├── mcp.json                                    # MCP server configuration
 │
-└── steering/
+└── refs/
     │
     ├── # Phase orchestrators (linear flow)
     ├── discover.md                             # Phase 1: Discover orchestrator
@@ -350,7 +350,7 @@ gcp-aws-migrate/
 
 This power includes an **optional** feedback phase that collects anonymized usage data to help improve the tool. Telemetry is **off by default** and only runs if the user explicitly opts in at one of two feedback checkpoints (after the Discover phase or after the Estimate phase).
 
-**What is collected:** Anonymous responses to 5 optional survey questions and aggregated migration metadata (e.g., number of resources discovered, migration path type, phases completed). See `steering/feedback-trace.md` for the full trace schema.
+**What is collected:** Anonymous responses to 5 optional survey questions and aggregated migration metadata (e.g., number of resources discovered, migration path type, phases completed). See `refs/feedback-trace.md` for the full trace schema.
 
 **What is never collected:** Resource names, file paths, account IDs, IP addresses, credentials, or any personally identifiable information.
 

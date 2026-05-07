@@ -54,16 +54,16 @@ Output to user: "AWS Architecture designed. Proceeding to Phase 4: Estimate Cost
 
 ## Reference Files
 
-Sub-design files may reference rubrics in `steering/`:
+Sub-design files may reference rubrics in `refs/`:
 
-- `steering/design-ref-index.md` — GCP type → rubric file lookup
-- `steering/design-ref-fast-path.md` — Deterministic 1:1 GCP→AWS mappings
-- `steering/design-ref-compute.md` — Compute service rubric
-- `steering/design-ref-database.md` — Database service rubric
-- `steering/design-ref-storage.md` — Storage service rubric
-- `steering/design-ref-networking.md` — Networking service rubric
-- `steering/design-ref-messaging.md` — Messaging service rubric
-- `steering/design-ref-ai.md` — AI/ML service rubric
+- `refs/design-ref-index.md` — GCP type → rubric file lookup
+- `refs/design-ref-fast-path.md` — Deterministic 1:1 GCP→AWS mappings
+- `refs/design-ref-compute.md` — Compute service rubric
+- `refs/design-ref-database.md` — Database service rubric
+- `refs/design-ref-storage.md` — Storage service rubric
+- `refs/design-ref-networking.md` — Networking service rubric
+- `refs/design-ref-messaging.md` — Messaging service rubric
+- `refs/design-ref-ai.md` — AI/ML service rubric
 
 ## Scope Boundary
 

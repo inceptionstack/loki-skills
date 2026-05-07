@@ -53,7 +53,7 @@ If not a git repo: `cd <repo-path> && git init && git add . && git commit -m "In
 
 ### Telemetry
 
-When running `atx custom def exec`, always include the `--telemetry` flag (see the Telemetry section in POWER.md). Format:
+When running `atx custom def exec`, always include the `--telemetry` flag (see the Telemetry section in SKILL.md). Format:
 `--telemetry "client=kiro,agent=kiro,executionMode=<local|remote>"`
 
 - `client` is always `kiro`
@@ -83,7 +83,7 @@ nohup ~/.aws/atx/custom/atx-agent-session/run.sh > ~/.aws/atx/custom/atx-agent-s
 echo $! > ~/.aws/atx/custom/atx-agent-session/transform.pid
 cat ~/.aws/atx/custom/atx-agent-session/transform.pid
 ```
-Omit `--configuration` if no config is needed. Include `--telemetry` always — see POWER.md for details.
+Omit `--configuration` if no config is needed. Include `--telemetry` always — see SKILL.md for details.
 
 This backgrounds the runner script (not ATX directly), so the exit code is
 captured to `~/.aws/atx/custom/atx-agent-session/transform.exit` when ATX finishes. The PID file tracks
@@ -201,8 +201,8 @@ If NOT_DEPLOYED: get user consent, then deploy. See [remote-execution.md](remote
 | Source Type | Action |
 |-------------|--------|
 | HTTPS git URL (public) | Use directly — container clones it |
-| HTTPS git URL (private) | Verify `atx/github-token` exists in Secrets Manager (see Step 1 in POWER.md), then use directly — container fetches PAT and clones |
-| SSH git URL (public or private) | Verify `atx/ssh-key` exists in Secrets Manager (see Step 1 in POWER.md), then use directly — container fetches SSH key and clones |
+| HTTPS git URL (private) | Verify `atx/github-token` exists in Secrets Manager (see Step 1 in SKILL.md), then use directly — container fetches PAT and clones |
+| SSH git URL (public or private) | Verify `atx/ssh-key` exists in Secrets Manager (see Step 1 in SKILL.md), then use directly — container fetches SSH key and clones |
 | S3 bucket with zips | Copy zips from user's bucket to managed source bucket (`atx-source-code-{account}`), then use managed S3 paths |
 | Local repo | Zip → upload to S3 → use S3 path |
 
@@ -225,7 +225,7 @@ aws lambda invoke --function-name atx-trigger-job \
   --cli-binary-format raw-in-base64-out /dev/stdout
 ```
 Add `--configuration \"additionalPlanContext=<config>\"` to the command string if config is needed.
-The `--telemetry` flag is included always — see POWER.md for details.
+The `--telemetry` flag is included always — see SKILL.md for details.
 
 Set the appropriate version environment variable to match the transformation's target version:
 - `JAVA_VERSION` for Java transformations (e.g., `"21"` for a Java 8 → 21 upgrade)

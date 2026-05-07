@@ -38,7 +38,7 @@ For each billing service, attempt lookup in order:
 
 **2a. Fast-path lookup:**
 
-1. Look up `gcp_service_type` in `steering/design-ref-fast-path.md` → Direct Mappings table
+1. Look up `gcp_service_type` in `refs/design-ref-fast-path.md` → Direct Mappings table
 2. If found: assign AWS service
 3. Enrich with SKU hints:
    - If `top_skus` mention "PostgreSQL" → specify "RDS Aurora PostgreSQL"

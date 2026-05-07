@@ -75,7 +75,7 @@ The Amazon CloudWatch Application Signals Power provides comprehensive tools for
 
 ## Available Steering Files
 
-- **steering/steering.md** - Audit workflows, investigation patterns, and target format reference
+- **refs/steering.md** - Audit workflows, investigation patterns, and target format reference
 
 ## Available MCP Servers
 
