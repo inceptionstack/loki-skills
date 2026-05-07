@@ -13,18 +13,11 @@ cd ~/.openclaw/workspace
 git clone https://github.com/inceptionstack/loki-skills.git skills
 ```
 
-**Roundhouse / Pi:** Clone and install with SKILL.md symlinks (pi requires `SKILL.md`):
+**Roundhouse / Pi:** Clone and copy to pi agent skills:
 
 ```bash
 git clone https://github.com/inceptionstack/loki-skills.git /tmp/loki-skills
-for d in /tmp/loki-skills/*/; do
-  [ -d "$d" ] || continue
-  name=$(basename "$d")
-  cp -r "$d" ~/.pi/agent/skills/"$name"
-  # Pi requires SKILL.md — symlink from POWER.md if needed
-  [ -f ~/.pi/agent/skills/"$name"/POWER.md ] && [ ! -f ~/.pi/agent/skills/"$name"/SKILL.md ] && \
-    ln -s POWER.md ~/.pi/agent/skills/"$name"/SKILL.md
-done
+cp -r /tmp/loki-skills/*/ ~/.pi/agent/skills/
 ```
 
 ## Skills
