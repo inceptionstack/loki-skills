@@ -58,20 +58,38 @@ done
 
 ### Custom (loki-only)
 
+<!-- custom-skills-start -->
 | Skill | Description |
 |-------|-------------|
 | `claude-agent-sdk` | Build AI agents using Claude Agent SDK |
 | `cross-agent-test` | Zero-context cross-agent testing of CLI tools |
 | `lambda-durable` | AWS Lambda durable functions |
+| `mcporter` | Use MCP servers via CLI |
+| `module-organizer` | Prevent namespace drift in TypeScript projects |
+| `playwright-cli` | Browser automation via playwright-cli |
+| `refactoring` | Refactoring patterns & safe code transformation |
+| `unit-testing` | Unit testing with ATAT (3rd Edition) |
+
+**Note:** Custom skills list must match the `CUSTOM_SKILLS` array in `.github/workflows/sync-upstream.yml`. Consistency is verified by CI (`.github/workflows/lint.yml`).
+
+<!-- custom-skills-end -->
 
 ## Sync with upstream
 
+**Automated:** Daily sync via GitHub Actions (`.github/workflows/sync-upstream.yml`).
+- Runs at 08:00 UTC daily
+- Creates PR if changes detected (manual review before merge)
+- Clones from `main` branch (upstream has no release tags)
+- Preserves custom skills (see above)
+- **Prerequisite:** Enable "Allow GitHub Actions to create and approve pull requests" in repo settings (Settings → Actions → General)
+
+**Manual sync:**
 ```bash
 git clone --depth 1 https://github.com/kirodotdev/powers.git /tmp/powers
-# Copy new/updated skills, preserve custom ones
+# Copy new/updated skills, preserve custom ones (see CUSTOM_SKILLS array in workflow)
 ```
 
-Last synced: 2026-05-07
+Last synced: 2026-05-17
 
 ## License
 

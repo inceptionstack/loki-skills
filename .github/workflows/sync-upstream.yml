@@ -1,0 +1,130 @@
+name: Sync from upstream Kiro Powers
+
+on:
+  schedule:
+    # Daily at 08:00 UTC (11:00 Israel time)
+    - cron: '0 8 * * *'
+  workflow_dispatch:
+
+concurrency:
+  group: sync-upstream
+  cancel-in-progress: false
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      pull-requests: write
+
+    steps:
+      - name: Checkout loki-skills
+        uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
+        with:
+          fetch-depth: 0
+
+      - name: Clone upstream Kiro Powers (main branch)
+        run: |
+          set -euo pipefail
+          
+          # Clone from main branch (upstream has no release tags)
+          # This is safe because we filter to SKILL.md files and preserve custom skills
+          echo "✅ Cloning from main branch"
+          git clone --depth 1 https://github.com/kirodotdev/powers.git /tmp/powers
+
+      - name: Sync upstream skills (preserve custom ones)
+        run: |
+          set -euo pipefail
+          shopt -s nullglob
+          
+          # Custom skills to preserve (not from upstream)
+          # Synced from README.md "Custom (loki-only)" section
+          CUSTOM_SKILLS=("claude-agent-sdk" "cross-agent-test" "lambda-durable" "mcporter" "module-organizer" "playwright-cli" "refactoring" "unit-testing")
+          
+          # Copy/update all upstream skills except custom ones
+          # Filter: only dirs containing SKILL.md (actual skills, not docs/scripts/etc)
+          for skill_dir in /tmp/powers/*/; do
+            # Guard: skip if dir doesn't exist (nullglob edge case)
+            [ -d "$skill_dir" ] || continue
+            
+            # Filter: only process if SKILL.md exists (is a real skill)
+            [ -f "$skill_dir/SKILL.md" ] || {
+              echo "⏭️  Skipping non-skill dir: $(basename "$skill_dir")"
+              continue
+            }
+            
+            skill_name=$(basename "$skill_dir")
+            
+            # Skip if custom skill (exact match, no regex interpretation)
+            if printf '%s\n' "${CUSTOM_SKILLS[@]}" | grep -qxF -- "$skill_name"; then
+              echo "⏭️  Skipping custom skill: $skill_name"
+              continue
+            fi
+            
+            # Copy or update skill
+            if [ -d "$skill_name" ]; then
+              echo "🔄 Updating: $skill_name"
+              rm -rf "$skill_name"
+            else
+              echo "✨ Adding new: $skill_name"
+            fi
+            cp -r "${skill_dir%/}" "$skill_name"
+          done
+          
+          # Note: Deletions of removed upstream skills are intentionally NOT performed.
+          # Skills removed upstream stay in loki-skills (manual review + cleanup).
+          # This prevents accidental deletion of valuable but deprecated skills.
+
+      - name: Cleanup temp directory
+        run: |
+          set -euo pipefail
+          rm -rf /tmp/powers
+
+      - name: Check for changes
+        id: check
+        run: |
+          set -euo pipefail
+          if [ -z "$(git status --porcelain)" ]; then
+            echo "has_changes=false" >> $GITHUB_OUTPUT
+          else
+            echo "has_changes=true" >> $GITHUB_OUTPUT
+            echo "📋 Changed files:"
+            git status --porcelain
+          fi
+
+      - name: Update README sync date
+        if: steps.check.outputs.has_changes == 'true'
+        run: |
+          set -euo pipefail
+          TODAY=$(date -u +"%Y-%m-%d")
+          sed -i "s/Last synced: .*/Last synced: $TODAY/" README.md
+
+      - name: Create PR if changes detected
+        if: steps.check.outputs.has_changes == 'true'
+        uses: peter-evans/create-pull-request@22a9089034f40e5a961c8808d113e2c98fb63676 # v7
+        with:
+          commit-message: 'chore: sync upstream Kiro Powers skills'
+          title: 'chore: sync upstream Kiro Powers skills'
+          body: |
+            Automated daily sync from [kirodotdev/powers](https://github.com/kirodotdev/powers).
+            
+            **Preserved custom skills:**
+            - `claude-agent-sdk`
+            - `cross-agent-test`
+            - `lambda-durable`
+            - `mcporter`
+            - `module-organizer`
+            - `playwright-cli`
+            - `refactoring`
+            - `unit-testing`
+            
+            **Sync details:**
+            - Adds new upstream skills
+            - Updates existing skills
+            - Does NOT delete skills removed upstream (manual review required)
+            - Filters: only dirs with `SKILL.md` are synced (skips docs/scripts)
+            - Synced at: ${{ github.run_started_at }}
+            - Workflow run: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+          branch: chore/sync-upstream-skills
+          delete-branch: true
+          labels: 'chore, automated'
