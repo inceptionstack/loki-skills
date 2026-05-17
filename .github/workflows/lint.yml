@@ -1,0 +1,38 @@
+name: Lint
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  verify-custom-skills-sync:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
+
+      - name: Verify custom skills list consistency
+        run: |
+          set -euo pipefail
+          
+          # Extract CUSTOM_SKILLS from workflow (anchor to line start + optional whitespace)
+          WORKFLOW_SKILLS=$(grep "^[[:space:]]*CUSTOM_SKILLS=(" .github/workflows/sync-upstream.yml | sed 's/.*CUSTOM_SKILLS=(\([^)]*\)).*/\1/' | tr ' ' '\n' | sed 's/"//g' | sort)
+          
+          # Extract custom skills from README (markdown table between sentinel comments)
+          README_SKILLS=$(sed -n '/<!-- custom-skills-start -->/,/<!-- custom-skills-end -->/p' README.md | grep '| `' | awk -F'`' '{print $2}' | sort)
+          
+          echo "Workflow CUSTOM_SKILLS:"
+          echo "$WORKFLOW_SKILLS"
+          echo ""
+          echo "README custom skills:"
+          echo "$README_SKILLS"
+          echo ""
+          
+          if [ "$WORKFLOW_SKILLS" = "$README_SKILLS" ]; then
+            echo "✅ Custom skills lists are in sync"
+          else
+            echo "❌ Custom skills lists are out of sync!"
+            echo "Workflow has: $WORKFLOW_SKILLS"
+            echo "README has: $README_SKILLS"
+            exit 1
+          fi
